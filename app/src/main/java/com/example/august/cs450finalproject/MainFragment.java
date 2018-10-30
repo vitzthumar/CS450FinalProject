@@ -16,8 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import java.util.HashSet;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -153,6 +155,10 @@ public class MainFragment extends Fragment implements Observer {
 
         markedLat.setText(latString);
         markedLon.setText(lonString);
+
+        //TODO: THIS IS A TEST
+        User newUser = new User("TESTNAME", "TESTEMAIL", new HashSet<String>(), currentLocation);
+        newUser.writeToDatabase();
     }
 
 

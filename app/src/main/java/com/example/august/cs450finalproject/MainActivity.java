@@ -17,14 +17,24 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.example.august.cs450finalproject.MainFragment.OnFragmentInteractionListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private Observable location;
     private final static int PERMISSION_REQUEST_CODE = 999;
+    private final static String TAG = "MY TAG";
 
     private boolean permissions_granted;
     private final static String LOGTAG =
             MainActivity.class.getSimpleName();
+
+    // the instance database
+    private FirebaseDatabase database = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +42,12 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         setContentView(R.layout.activity_main);
 
     }
+
+    // Method to access the Firebase database
+    public FirebaseDatabase getDatabase() {
+        return this.database;
+    }
+
     public boolean isPermissions_granted() {
         return permissions_granted;
     }
