@@ -9,12 +9,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashSet;
 
 // Class defining the information available to a specific user
 public class User {
 
-    public static final String TAG = "TEST_TAG";
+    private final static String LOGTAG = User.class.getSimpleName();
 
     // instance variables
     private String name = null;
@@ -42,7 +46,20 @@ public class User {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("test");
 
-        String concatStr = this.name + " " + this.email + this.location.toString();
+        String concatStr = this.name + " " + this.email + " " + this.location.getLatitude() + " " + this.location.getLongitude();
+
+        JSONObject userJSON = new JSONObject();
+        JSONArray arrayJSON = new JSONArray();
+
+
+        try {
+            userJSON.put("name", this.name);
+            userJSON.put("latitude", this.location.getLatitude());
+            userJSON.put("longitude", this.location.getLongitude());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(LOGTAG, "JSON not able to be created");
+        }
 
         myRef.setValue(concatStr);
 

@@ -157,7 +157,7 @@ public class MainFragment extends Fragment implements Observer {
         markedLon.setText(lonString);
 
         //TODO: THIS IS A TEST
-        User newUser = new User("TESTNAME", "TESTEMAIL", new HashSet<String>(), currentLocation);
+        User newUser = new User("August Vitzthum", "vitzthum.ar@gmail.com", new HashSet<String>(), currentLocation);
         newUser.writeToDatabase();
     }
 

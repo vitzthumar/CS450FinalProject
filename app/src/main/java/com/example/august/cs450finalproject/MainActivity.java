@@ -30,8 +30,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     private final static String TAG = "MY TAG";
 
     private boolean permissions_granted;
-    private final static String LOGTAG =
-            MainActivity.class.getSimpleName();
+    private final static String LOGTAG = MainActivity.class.getSimpleName();
 
     // the instance database
     private FirebaseDatabase database = null;
