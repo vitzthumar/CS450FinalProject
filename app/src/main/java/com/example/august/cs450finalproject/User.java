@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 // Class defining the information available to a specific user
@@ -25,60 +26,70 @@ public class User {
     private String email = null;
     private String password = null;
     private HashSet<String> friendIDs = null;
-    //private HashSet<String> friendsOfFriends = null;
-    private Location location = null;
+    private String latititude = null;
+    private String longitude = null;
 
     // User constructor
-    public User(String name, String email, HashSet<String> friendIDs, Location location) {
+    public User(String name, String email, String password, HashSet<String> friendIDs, Location location) {
         // assign the parameters to the instance variables
         this.name = name;
         this.email = email;
+        this.password = password;
         this.friendIDs = friendIDs;
-        this.location = location;
+        this.latititude = Double.toString(location.getLatitude());
+        this.longitude = Double.toString(location.getLongitude());
     }
 
-    // Method used to update this user's location
-    private void updateLocation(Location mostRecentLocation) {
-        this.location = mostRecentLocation;
+    // Add this user to Firebase
+    public void addUserToFirebase() {
+        // create the user's JSON information
+        HashMap<String, String> newUser = createUserJSON();
+        // add that JSON information to Firebase
+        writeToDatabase(newUser);
     }
 
-    public void writeToDatabase() {
+    // Use this to create a JSON object for a User
+    private HashMap<String, String> createUserJSON() {
+
+        HashMap<String, String> userData = new HashMap<String, String>();
+
+        userData.put("Name", this.name);
+        userData.put("Email", this.email);
+        userData.put("Password", this.password);
+        userData.put("Friends", " ");
+        userData.put("Latitude", this.latititude);
+        userData.put("Longitude", this.longitude);
+
+        return userData;
+    }
+
+    // Write data to Firebase
+    private void writeToDatabase(HashMap<String, String> newUser) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("test");
+        DatabaseReference usersReference = database.getReference("Users");
 
-        String concatStr = this.name + " " + this.email + " " + this.location.getLatitude() + " " + this.location.getLongitude();
+        usersReference = usersReference.child(this.name);
+        usersReference.setValue(newUser);
+    }
 
-        JSONObject userJSON = new JSONObject();
-        JSONArray arrayJSON = new JSONArray();
-
-
-        try {
-            userJSON.put("name", this.name);
-            userJSON.put("latitude", this.location.getLatitude());
-            userJSON.put("longitude", this.location.getLongitude());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(LOGTAG, "JSON not able to be created");
-        }
-
-        myRef.setValue(concatStr);
-
+    private void readFromDatabase() {
+                /*
         // Read from the database
-        myRef.addValueEventListener(new ValueEventListener() {
+        usersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 String value = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "Value is: " + value);
+                Log.d(LOGTAG, "Value is: " + value);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
+                Log.w(LOGTAG, "Failed to read value.", error.toException());
             }
         });
+        */
     }
-
 }

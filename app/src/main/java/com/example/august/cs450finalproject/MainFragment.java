@@ -157,9 +157,14 @@ public class MainFragment extends Fragment implements Observer {
         markedLon.setText(lonString);
 
         //TODO: THIS IS A TEST
-        User newUser = new User("August Vitzthum", "vitzthum.ar@gmail.com", new HashSet<String>(), currentLocation);
-        newUser.writeToDatabase();
+        Thread thread = new Thread(){
+            public void run(){
+                User newUser = new User("August Vitzthum", "vitzthum.ar@gmail.com", "password", new HashSet<String>(), markedLocation);
+                User newUser2 = new User("Nevaan Perera", "nevaan9@gmail.com", "password", new HashSet<String>(), markedLocation);
+                newUser.addUserToFirebase();
+                newUser2.addUserToFirebase();
+            }
+        };
+        thread.start();
     }
-
-
 }
