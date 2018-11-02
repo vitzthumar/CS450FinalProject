@@ -11,19 +11,36 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.text.method.ScrollingMovementMethod;
+
+import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.HashSet;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
 public class MainFragment extends Fragment implements Observer {
+
+
+    private final static String LOGTAG = MainFragment.class.getSimpleName();
+
 
     private OnFragmentInteractionListener mListener;
     private final static int PERMISSION_REQUEST_CODE = 999;
@@ -159,12 +176,56 @@ public class MainFragment extends Fragment implements Observer {
         //TODO: THIS IS A TEST
         Thread thread = new Thread(){
             public void run(){
-                User newUser = new User("August Vitzthum", "vitzthum.ar@gmail.com", "password", new HashSet<String>(), markedLocation);
-                User newUser2 = new User("Nevaan Perera", "nevaan9@gmail.com", "password", new HashSet<String>(), markedLocation);
-                newUser.addUserToFirebase();
-                newUser2.addUserToFirebase();
+
+                writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com", "password");
+                writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
+
             }
         };
         thread.start();
     }
+
+
+
+
+    // Read user from Firebase
+    private void readUserFromDatabase() {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersReference = database.getReference("Users");
+
+        // Read from the database
+        usersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String value = dataSnapshot.getValue(String.class);
+                Log.d(LOGTAG, "Value is: " + value);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(LOGTAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
+
+    // Write a new user to Firebase
+    private void writeUserToDatabase(String name, String email, String password) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersReference = database.getReference("Users");
+
+        // generate this user's unique ID by stripping the email of all irregular symbols
+        String uniqueUserID = email.replaceAll("[!#$%&'*+-/=?^_`{|}~@.]","");
+
+        // create the new user that will be added from the supplied parameters
+        User newUser = new User(uniqueUserID, name, email, password);
+
+        // set the value in the database under the unique ID
+        usersReference = usersReference.child(uniqueUserID);
+        usersReference.setValue(newUser);
+    }
+
 }
