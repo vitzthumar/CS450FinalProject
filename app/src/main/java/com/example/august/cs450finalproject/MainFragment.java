@@ -181,6 +181,8 @@ public class MainFragment extends Fragment implements Observer {
                 writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
                 writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu", "password");
                 readUserFromDatabase("vitzthumargmailcom");
+                readUserFromDatabase("dalek15stlawuedu");
+                readUserFromDatabase("nevaan9gmailcom");
 
             }
         };
@@ -194,41 +196,27 @@ public class MainFragment extends Fragment implements Observer {
     private void readUserFromDatabase(String uniqueUserID) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-        // which string is being accessed?
-        String userField;
-        // instance variables for a user
-        String userName;
-        String userEmail;
-        String userPassword;
-        String userUniqueID;
-        // TODO: Add location and friends list instance variables
-
-        // set the user field to the specific field in the user class that should be accessed
-        userField = "name";
         // access the user from the database and get specific components
-        DatabaseReference usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
-        userField = "email";
-        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
-        userField = "password";
-        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
-        userField = "uniqueID";
-        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
-        // TODO: Add location and friends list
+        DatabaseReference usersReference = database.getReference("Users").child(uniqueUserID);
 
-
-        // Read from the database
-        usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        usersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                    //String accessedField = dataSnapshot.getValue(String.class);
+
+                String name = (String) dataSnapshot.child("name").getValue();
+                String email = (String) dataSnapshot.child("email").getValue();
+                String password = (String) dataSnapshot.child("password").getValue();
+                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
+
+                // TODO: Find a way to get this new User back to readUserFromDatabase()
+                User readUser = new User(uniqueID, name, email, password);
+                Log.e(LOGTAG, uniqueID);
+
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(LOGTAG, "Failed to read value.", error.toException());
+            public void onCancelled(DatabaseError databaseError) {
+                // ...
             }
         });
     }
