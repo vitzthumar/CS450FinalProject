@@ -179,6 +179,8 @@ public class MainFragment extends Fragment implements Observer {
 
                 writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com", "password");
                 writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
+                writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu", "password");
+                readUserFromDatabase("vitzthumargmailcom");
 
             }
         };
@@ -189,18 +191,38 @@ public class MainFragment extends Fragment implements Observer {
 
 
     // Read user from Firebase
-    private void readUserFromDatabase() {
+    private void readUserFromDatabase(String uniqueUserID) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersReference = database.getReference("Users");
+
+        // which string is being accessed?
+        String userField;
+        // instance variables for a user
+        String userName;
+        String userEmail;
+        String userPassword;
+        String userUniqueID;
+        // TODO: Add location and friends list instance variables
+
+        // set the user field to the specific field in the user class that should be accessed
+        userField = "name";
+        // access the user from the database and get specific components
+        DatabaseReference usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
+        userField = "email";
+        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
+        userField = "password";
+        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
+        userField = "uniqueID";
+        usersReference = database.getReference("Users").child(uniqueUserID).child(userField);
+        // TODO: Add location and friends list
+
 
         // Read from the database
-        usersReference.addValueEventListener(new ValueEventListener() {
+        usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
-                Log.d(LOGTAG, "Value is: " + value);
+                    //String accessedField = dataSnapshot.getValue(String.class);
             }
 
             @Override
@@ -227,5 +249,4 @@ public class MainFragment extends Fragment implements Observer {
         usersReference = usersReference.child(uniqueUserID);
         usersReference.setValue(newUser);
     }
-
 }
