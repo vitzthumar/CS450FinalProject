@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">CS450FinalProject</string>
+    <string name="current_longitude">CURRENT LONGITUDE:</string>
+    <string name="current_latitude">CURRENT LATITUDE:</string>
+    <string name="marked_longitude">MARKED LONGITUDE:</string>
+    <string name="marked_latitude">MARKED LATITUDE:</string>
+    <string name="mark_location">MARK LOCATION</string>
+    <string name="distance_from_mark">DISTANCE FROM MARK:</string>
 </resources>
