@@ -47,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (v == button_login){
                     startActivity(new Intent(getApplicationContext(),
-                            MainActivity.class));
+                            LoginActivity.class));
                 }
             }
         });
