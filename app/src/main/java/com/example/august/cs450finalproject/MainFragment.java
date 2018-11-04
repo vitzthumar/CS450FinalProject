@@ -180,6 +180,7 @@ public class MainFragment extends Fragment implements Observer {
                 writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com", "password");
                 writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
                 writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu", "password");
+                writeUserToDatabase("Tali Makovsky", "tmako17@stlawu.edu", "12345");
                 readUserFromDatabase("vitzthumargmailcom");
                 readUserFromDatabase("dalek15stlawuedu");
                 readUserFromDatabase("nevaan9gmailcom");
