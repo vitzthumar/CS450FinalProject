@@ -181,10 +181,13 @@ public class MainFragment extends Fragment implements Observer {
                 writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
                 writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu", "password");
                 writeUserToDatabase("Tali Makovsky", "tmako17@stlawu.edu", "12345");
-                readUserFromDatabase("vitzthumargmailcom");
-                readUserFromDatabase("dalek15stlawuedu");
-                readUserFromDatabase("nevaan9gmailcom");
-
+                readUserFromDatabase("vitzthumargmailcom", new UserCallback() {
+                    @Override
+                    public void onCallback(User readUser) {
+                        // this is where we get the user read from Firebase
+                        Log.e(LOGTAG, "USER NAME = " + readUser.name);
+                    }
+                });
             }
         };
         thread.start();
@@ -194,11 +197,12 @@ public class MainFragment extends Fragment implements Observer {
 
 
     // Read user from Firebase
-    private void readUserFromDatabase(String uniqueUserID) {
+    private void readUserFromDatabase(final String uniqueUserID, final UserCallback userCallback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         // access the user from the database and get specific components
         DatabaseReference usersReference = database.getReference("Users").child(uniqueUserID);
+
 
         usersReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -211,13 +215,14 @@ public class MainFragment extends Fragment implements Observer {
 
                 // TODO: Find a way to get this new User back to readUserFromDatabase()
                 User readUser = new User(uniqueID, name, email, password);
-                Log.e(LOGTAG, uniqueID);
-
+                userCallback.onCallback(readUser);
+                Log.d(LOGTAG, "Read user is: " + uniqueID);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // ...
+                userCallback.onCallback(null);
+                Log.e(LOGTAG, "Encountered error while reading user");
             }
         });
     }
