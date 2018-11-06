@@ -56,6 +56,9 @@ public class MainFragment extends Fragment implements Observer {
     Location currentLocation = null;
     Location markedLocation = null;
 
+    // Firebase instance
+    FirebaseDatabase database = null;
+
     // Required empty constructor
     public MainFragment() {
     }
@@ -64,6 +67,9 @@ public class MainFragment extends Fragment implements Observer {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        // set the Firebase instance
+        this.database = FirebaseDatabase.getInstance();
 
         if (handler == null) {
             this.handler = new LocationHandler(getActivity());
@@ -177,10 +183,10 @@ public class MainFragment extends Fragment implements Observer {
         Thread thread = new Thread(){
             public void run(){
 
-                writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com", "password");
-                writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com", "password");
-                writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu", "password");
-                writeUserToDatabase("Tali Makovsky", "tmako17@stlawu.edu", "12345");
+                writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com");
+                writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com");
+                writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu");
+                writeUserToDatabase("Tali Makovsky", "tmako17@stlawu.edu");
                 readUserFromDatabase("vitzthumargmailcom", new UserCallback() {
                     @Override
                     public void onCallback(User readUser) {
@@ -198,10 +204,9 @@ public class MainFragment extends Fragment implements Observer {
 
     // Read user from Firebase
     private void readUserFromDatabase(final String uniqueUserID, final UserCallback userCallback) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         // access the user from the database and get specific components
-        DatabaseReference usersReference = database.getReference("Users").child(uniqueUserID);
+        DatabaseReference usersReference = this.database.getReference("Users").child(uniqueUserID);
 
 
         usersReference.addValueEventListener(new ValueEventListener() {
@@ -210,11 +215,10 @@ public class MainFragment extends Fragment implements Observer {
 
                 String name = (String) dataSnapshot.child("name").getValue();
                 String email = (String) dataSnapshot.child("email").getValue();
-                String password = (String) dataSnapshot.child("password").getValue();
                 String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
 
                 // TODO: Find a way to get this new User back to readUserFromDatabase()
-                User readUser = new User(uniqueID, name, email, password);
+                User readUser = new User(uniqueID, name, email);
                 userCallback.onCallback(readUser);
                 Log.d(LOGTAG, "Read user is: " + uniqueID);
             }
@@ -229,15 +233,14 @@ public class MainFragment extends Fragment implements Observer {
 
 
     // Write a new user to Firebase
-    private void writeUserToDatabase(String name, String email, String password) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersReference = database.getReference("Users");
+    private void writeUserToDatabase(String name, String email) {
+        DatabaseReference usersReference = this.database.getReference("Users");
 
         // generate this user's unique ID by stripping the email of all irregular symbols
         String uniqueUserID = email.replaceAll("[!#$%&'*+-/=?^_`{|}~@.]","");
 
         // create the new user that will be added from the supplied parameters
-        User newUser = new User(uniqueUserID, name, email, password);
+        User newUser = new User(uniqueUserID, name, email);
 
         // set the value in the database under the unique ID
         usersReference = usersReference.child(uniqueUserID);
