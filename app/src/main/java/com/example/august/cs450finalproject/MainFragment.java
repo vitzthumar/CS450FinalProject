@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -21,6 +22,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +41,12 @@ import java.util.Observer;
 
 public class MainFragment extends Fragment implements Observer {
 
+    // Auth stuff
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+    private TextView Email;
+    private TextView Uid;
+    private Button logout;
 
     private final static String LOGTAG = MainFragment.class.getSimpleName();
 
@@ -102,6 +111,31 @@ public class MainFragment extends Fragment implements Observer {
         markedLat = rootView.findViewById(R.id.markedLatitude);
         markedLon = rootView.findViewById(R.id.markedLongitude);
         distanceFromMark = rootView.findViewById(R.id.distanceFromMark);
+
+        // Auth stuff
+        Email = (TextView)rootView.findViewById(R.id.profileEmail);
+        Uid = (TextView)rootView.findViewById(R.id.profileUid);
+        mAuth = FirebaseAuth.getInstance();
+        logout = (Button)rootView.findViewById(R.id.button_logout);
+        user = mAuth.getCurrentUser();
+
+        if (user != null){
+            String email = user.getEmail();
+            String uid = user.getUid();
+            Email.setText(email);
+            Uid.setText(uid);
+        }
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(user !=null){
+                    mAuth.signOut();
+                    getActivity().finish();
+                    startActivity(new Intent(getContext(), MainActivity.class));
+                }
+            }
+        });
 
         return rootView;
     }
