@@ -28,8 +28,8 @@ public class User {
     public String name = null;
     public String email = null;
     //private HashSet<String> friendIDs = null;
-    //private String latititude = null;
-    //private String longitude = null;
+    private String latititude = null;
+    private String longitude = null;
 
     // User constructor
     public User(String uniqueID, String name, String email) {
@@ -37,6 +37,8 @@ public class User {
         this.uniqueID = uniqueID;
         this.name = name;
         this.email = email;
+        this.latititude = "NOT_UPDATED";
+        this.longitude = "NOT_UPDATED";
     }
 
     // Default constructor required for calls to DataSnapshot.getValue(User.class)

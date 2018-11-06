@@ -47,6 +47,9 @@ public class MainFragment extends Fragment implements Observer {
     private TextView Email;
     private TextView Uid;
     private Button logout;
+    // user location information
+    private double latitude;
+    private double longitude;
 
     private final static String LOGTAG = MainFragment.class.getSimpleName();
 
@@ -62,6 +65,7 @@ public class MainFragment extends Fragment implements Observer {
     TextView markedLat;
     TextView markedLon;
     TextView distanceFromMark;
+
     Location currentLocation = null;
     Location markedLocation = null;
 
@@ -169,6 +173,9 @@ public class MainFragment extends Fragment implements Observer {
             currentLocation = (Location) o;
             final double lat = currentLocation.getLatitude();
             final double lon = currentLocation.getLongitude();
+
+            updateUserLocation(lat, lon);
+
             String latString = "CURRENT LATITUDE: " + Double.toString(lat);
             String lonString = "CURRENT LONGITUDE: " + Double.toString(lon);
 
@@ -270,14 +277,32 @@ public class MainFragment extends Fragment implements Observer {
     private void writeUserToDatabase(String name, String email) {
         DatabaseReference usersReference = this.database.getReference("Users");
 
-        // generate this user's unique ID by stripping the email of all irregular symbols
-        String uniqueUserID = email.replaceAll("[!#$%&'*+-/=?^_`{|}~@.]","");
-
         // create the new user that will be added from the supplied parameters
-        User newUser = new User(uniqueUserID, name, email);
+        User newUser = new User(user.getUid(), name, email);
 
         // set the value in the database under the unique ID
-        usersReference = usersReference.child(uniqueUserID);
+        usersReference = usersReference.child(user.getUid());
         usersReference.setValue(newUser);
+    }
+
+    // Update user's current location in Firebase
+    private void updateUserLocation(final double currentLat, final double currentLon) {
+        // access the user from the database and get specific components
+        final DatabaseReference usersReference = this.database.getReference("Users").child(user.getUid());
+
+        usersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                usersReference.child("latitude").setValue(String.valueOf(currentLat));
+                usersReference.child("longitude").setValue(String.valueOf(currentLon));
+
+                Log.d(LOGTAG, "Updated lat/lon is: " + String.valueOf(currentLat) + "/" + String.valueOf(currentLon));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(LOGTAG, "Encountered error while updating location");
+            }
+        });
     }
 }
