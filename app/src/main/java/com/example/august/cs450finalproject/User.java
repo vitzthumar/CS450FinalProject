@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 // Class defining the information available to a specific user
 @IgnoreExtraProperties
@@ -27,7 +28,7 @@ public class User {
     public String uniqueID = null;
     public String name = null;
     public String email = null;
-    //private HashSet<String> friendIDs = null;
+    private Set<String> friendIDs = null;
     private String latititude = null;
     private String longitude = null;
 

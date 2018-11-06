@@ -30,17 +30,17 @@ public class LocationHandler extends Observable implements LocationListener {
                 == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
             locationManager.requestLocationUpdates(
                     LocationManager.PASSIVE_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
 
@@ -98,17 +98,17 @@ public class LocationHandler extends Observable implements LocationListener {
                 == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
             locationManager.requestLocationUpdates(
                     LocationManager.PASSIVE_PROVIDER,
-                    500,
+                    5000,
                     0,
                     this);
 

@@ -129,6 +129,7 @@ public class MainFragment extends Fragment implements Observer {
         logout = (Button)rootView.findViewById(R.id.button_logout);
         user = mAuth.getCurrentUser();
 
+        // is there a current user?
         if (user != null){
             String email = user.getEmail();
             String uid = user.getUid();
@@ -144,6 +145,14 @@ public class MainFragment extends Fragment implements Observer {
             // set the value in the database under the unique ID
             usersReference = usersReference.child(user.getUid());
             usersReference.setValue(newUser);
+
+            // now add the user to the list of friends
+            DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
+            friendsReference.push().setValue("fat boy");
+
+            addFriend("skinny boy");
+
+
         }
 
         logout.setOnClickListener(new View.OnClickListener() {
@@ -184,7 +193,8 @@ public class MainFragment extends Fragment implements Observer {
             final double lat = currentLocation.getLatitude();
             final double lon = currentLocation.getLongitude();
 
-            updateUserLocation(lat, lon);
+            // TODO FIX HOW LOCATION GETS UPDATED
+            //updateUserLocation(lat, lon);
 
             String latString = "CURRENT LATITUDE: " + Double.toString(lat);
             String lonString = "CURRENT LONGITUDE: " + Double.toString(lon);
@@ -262,7 +272,7 @@ public class MainFragment extends Fragment implements Observer {
 
     // Update user's current location in Firebase
     private void updateUserLocation(final double currentLat, final double currentLon) {
-        // access the user from the database and get specific components
+        // access this user from the database and get specific components
         final DatabaseReference usersReference = this.database.getReference("Users").child(user.getUid());
 
         usersReference.addValueEventListener(new ValueEventListener() {
@@ -279,5 +289,12 @@ public class MainFragment extends Fragment implements Observer {
                 Log.e(LOGTAG, "Encountered error while updating location");
             }
         });
+    }
+
+    // Add a friend for this user
+    private void addFriend(final String uniqueUserID) {
+        // access this user from the database and get specific components
+        DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
+        friendsReference.push().setValue("skinny boy");
     }
 }
