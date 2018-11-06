@@ -145,14 +145,6 @@ public class MainFragment extends Fragment implements Observer {
             // set the value in the database under the unique ID
             usersReference = usersReference.child(user.getUid());
             usersReference.setValue(newUser);
-
-            // now add the user to the list of friends
-            DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
-            friendsReference.push().setValue("fat boy");
-
-            addFriend("skinny boy");
-
-
         }
 
         logout.setOnClickListener(new View.OnClickListener() {
@@ -239,6 +231,10 @@ public class MainFragment extends Fragment implements Observer {
 
         markedLat.setText(latString);
         markedLon.setText(lonString);
+
+        // TODO REMOVE THIS TEST
+        addFriend("skinny boy");
+        addFriend("fat boy");
     }
 
     // Read user from Firebase
@@ -295,6 +291,6 @@ public class MainFragment extends Fragment implements Observer {
     private void addFriend(final String uniqueUserID) {
         // access this user from the database and get specific components
         DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
-        friendsReference.push().setValue("skinny boy");
+        friendsReference.child(uniqueUserID).setValue("location");
     }
 }
