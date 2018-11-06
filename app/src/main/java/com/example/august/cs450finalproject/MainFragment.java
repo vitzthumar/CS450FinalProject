@@ -134,6 +134,16 @@ public class MainFragment extends Fragment implements Observer {
             String uid = user.getUid();
             Email.setText(email);
             Uid.setText(uid);
+
+            // this user has been logged in/registered
+            DatabaseReference usersReference = this.database.getReference("Users");
+
+            // create the new user that will be added from the supplied parameters
+            User newUser = new User(user.getUid(), user.getEmail(), user.getEmail());
+
+            // set the value in the database under the unique ID
+            usersReference = usersReference.child(user.getUid());
+            usersReference.setValue(newUser);
         }
 
         logout.setOnClickListener(new View.OnClickListener() {
@@ -219,29 +229,7 @@ public class MainFragment extends Fragment implements Observer {
 
         markedLat.setText(latString);
         markedLon.setText(lonString);
-
-        //TODO: THIS IS A TEST
-        Thread thread = new Thread(){
-            public void run(){
-
-                writeUserToDatabase("August Vitzthum", "vitzthum.ar@gmail.com");
-                writeUserToDatabase("Nevaan Perera", "nevaan9@gmail.com");
-                writeUserToDatabase("Dasha Alekseeva", "dalek15@stlawu.edu");
-                writeUserToDatabase("Tali Makovsky", "tmako17@stlawu.edu");
-                readUserFromDatabase("vitzthumargmailcom", new UserCallback() {
-                    @Override
-                    public void onCallback(User readUser) {
-                        // this is where we get the user read from Firebase
-                        Log.e(LOGTAG, "USER NAME = " + readUser.name);
-                    }
-                });
-            }
-        };
-        thread.start();
     }
-
-
-
 
     // Read user from Firebase
     private void readUserFromDatabase(final String uniqueUserID, final UserCallback userCallback) {
@@ -270,19 +258,6 @@ public class MainFragment extends Fragment implements Observer {
                 Log.e(LOGTAG, "Encountered error while reading user");
             }
         });
-    }
-
-
-    // Write a new user to Firebase
-    private void writeUserToDatabase(String name, String email) {
-        DatabaseReference usersReference = this.database.getReference("Users");
-
-        // create the new user that will be added from the supplied parameters
-        User newUser = new User(user.getUid(), name, email);
-
-        // set the value in the database under the unique ID
-        usersReference = usersReference.child(user.getUid());
-        usersReference.setValue(newUser);
     }
 
     // Update user's current location in Firebase
