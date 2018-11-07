@@ -97,7 +97,7 @@ public class RegisterActivity extends AppCompatActivity {
                                             Toast.makeText(RegisterActivity.this, "registration successful",
                                                     Toast.LENGTH_SHORT).show();
                                             finish();
-                                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                            startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
                                         } else {
                                             Toast.makeText(RegisterActivity.this, "Could not create user",
                                                     Toast.LENGTH_SHORT).show();

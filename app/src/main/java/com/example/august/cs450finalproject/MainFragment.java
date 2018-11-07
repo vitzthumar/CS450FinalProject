@@ -22,6 +22,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.LocationCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -192,16 +195,48 @@ public class MainFragment extends Fragment implements Observer {
     // Method used to mark the user's current location
     private void markCurrentLocation() {
         // TODO: Fill this method
-        markedLocation = handler.getLocation();
-        String latString = "MARKED LATITUDE: " + Double.toString(markedLocation.getLatitude());
-        String lonString = "MARKED LONGITUDE: " + Double.toString(markedLocation.getLongitude());
+//        markedLocation = handler.getLocation();
+//        String latString = "MARKED LATITUDE: " + Double.toString(markedLocation.getLatitude());
+//        String lonString = "MARKED LONGITUDE: " + Double.toString(markedLocation.getLongitude());
+//
+//        markedLat.setText(latString);
+//        markedLon.setText(lonString);
 
-        markedLat.setText(latString);
-        markedLon.setText(lonString);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child("7BGC0zZhxePk4lnybtdpZeMAdvt2");
+        GeoFire geoFire = new GeoFire(ref);
+
+        // Set Location
+        geoFire.setLocation("location", new GeoLocation(37.7853889, 2.4056973), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
+        // Get location
+//        geoFire.getLocation("location", new LocationCallback() {
+//            @Override
+//            public void onLocationResult(String key, GeoLocation location) {
+//                if (location != null) {
+//                    System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
+//                } else {
+//                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                System.err.println("There was an error getting the GeoFire location: " + databaseError);
+//            }
+//        });
 
         // TODO REMOVE THIS TEST
-        addFriend("skinny boy");
-        addFriend("hello world");
+//        addFriend("skinny boy");
+//        addFriend("hello world");
     }
 
     // Read user from Firebase
