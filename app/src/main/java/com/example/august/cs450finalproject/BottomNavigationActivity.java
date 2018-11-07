@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class BottomNavigationActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener {
+public class BottomNavigationActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener,
+        ProfileFragment.OnFragmentInteractionListener, NotificationFragment.OnFragmentInteractionListener,
+        DashboardFragment.OnFragmentInteractionListener {
 
     private TextView mTextMessage;
 
@@ -54,9 +56,9 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         if (fragmentInt == 1) {
             manager.beginTransaction().replace(R.id.bottom_nav_container, new MainFragment()).commit();
         } else if (fragmentInt == 2) {
-            //manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new DashboardFragment()).commit();
         } else if (fragmentInt == 3) {
-            //manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new NotificationFragment()).commit();
         } else {
             manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
         }

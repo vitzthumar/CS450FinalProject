@@ -255,9 +255,9 @@ public class MainFragment extends Fragment implements Observer {
     }
 
     // Add a friend for this user
-    private void addFriend(final String uniqueUserID) {
+    private void addFriend(final String friendUserID) {
         // access this user from the database and get specific components
         DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
-        friendsReference.child(uniqueUserID).setValue("location");
+        friendsReference.child(friendUserID).setValue("aLocation");
     }
 }
