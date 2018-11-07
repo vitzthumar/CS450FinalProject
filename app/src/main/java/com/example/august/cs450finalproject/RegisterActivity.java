@@ -14,10 +14,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private EditText name;
     private EditText password;
     private EditText email;
     private Button button_register;
@@ -28,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        name = (EditText) findViewById(R.id.signup_name_input);
         email = (EditText) findViewById(R.id.signup_email_input);
         password =(EditText) findViewById(R.id.signup_password_input);
         button_register = (Button)findViewById(R.id.button_register);
@@ -54,8 +59,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void RegisterUser(){
-        String Email = email.getText().toString().trim();
+        final String Name = name.getText().toString().trim();
+        final String Email = email.getText().toString().trim();
         String Password = password.getText().toString().trim();
+        if (TextUtils.isEmpty(Name)){
+            Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (TextUtils.isEmpty(Email)){
             Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
             return;
@@ -73,10 +83,27 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 //User is successfully registered and logged in
                                 //start Profile Activity here
-                                Toast.makeText(RegisterActivity.this, "registration successful",
-                                        Toast.LENGTH_SHORT).show();
-                                finish();
-                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                // create the new user that will be added from the supplied parameters
+                                User newUser = new User(
+                                        Name,
+                                        Email);
+
+                                DatabaseReference db = FirebaseDatabase.getInstance().getReference("Users");
+                                // set the value in the database under the unique ID
+                                db.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(newUser).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(RegisterActivity.this, "registration successful",
+                                                    Toast.LENGTH_SHORT).show();
+                                            finish();
+                                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                        } else {
+                                            Toast.makeText(RegisterActivity.this, "Could not create user",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                             }else{
                                 Toast.makeText(RegisterActivity.this, "Couldn't register, try again",
                                         Toast.LENGTH_SHORT).show();

@@ -75,6 +75,15 @@
             android:textSize="30sp"
             android:text="Profile"
             android:textColor="#000"/>
+
+        <TextView
+            android:padding="10dp"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:id="@+id/profileName"/>
+
         <TextView
             android:padding="10dp"
             android:layout_margin="5dp"

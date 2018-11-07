@@ -44,12 +44,10 @@ public class MainFragment extends Fragment implements Observer {
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private TextView Name;
     private TextView Email;
     private TextView Uid;
     private Button logout;
-    // user location information
-    private double latitude;
-    private double longitude;
 
     private final static String LOGTAG = MainFragment.class.getSimpleName();
 
@@ -123,6 +121,7 @@ public class MainFragment extends Fragment implements Observer {
         distanceFromMark = rootView.findViewById(R.id.distanceFromMark);
 
         // Auth stuff
+        Name = (TextView)rootView.findViewById(R.id.profileName);
         Email = (TextView)rootView.findViewById(R.id.profileEmail);
         Uid = (TextView)rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
@@ -133,18 +132,21 @@ public class MainFragment extends Fragment implements Observer {
         if (user != null){
             String email = user.getEmail();
             String uid = user.getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("name");
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String name = dataSnapshot.getValue(String.class);
+                    Name.setText(name);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
             Email.setText(email);
             Uid.setText(uid);
-
-            // this user has been logged in/registered
-            DatabaseReference usersReference = this.database.getReference("Users");
-
-            // create the new user that will be added from the supplied parameters
-            User newUser = new User(user.getUid(), user.getEmail(), user.getEmail());
-
-            // set the value in the database under the unique ID
-            usersReference = usersReference.child(user.getUid());
-            usersReference.setValue(newUser);
         }
 
         logout.setOnClickListener(new View.OnClickListener() {
@@ -153,7 +155,7 @@ public class MainFragment extends Fragment implements Observer {
                 if(user !=null){
                     mAuth.signOut();
                     getActivity().finish();
-                    startActivity(new Intent(getContext(), MainActivity.class));
+                    startActivity(new Intent(getContext(), LoginActivity.class));
                 }
             }
         });
@@ -234,7 +236,7 @@ public class MainFragment extends Fragment implements Observer {
 
         // TODO REMOVE THIS TEST
         addFriend("skinny boy");
-        addFriend("fat boy");
+        addFriend("hello world");
     }
 
     // Read user from Firebase
@@ -253,7 +255,7 @@ public class MainFragment extends Fragment implements Observer {
                 String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
 
                 // TODO: Find a way to get this new User back to readUserFromDatabase()
-                User readUser = new User(uniqueID, name, email);
+                User readUser = new User(name, email);
                 userCallback.onCallback(readUser);
                 Log.d(LOGTAG, "Read user is: " + uniqueID);
             }

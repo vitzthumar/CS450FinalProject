@@ -25,22 +25,13 @@ public class User {
     private final static String LOGTAG = User.class.getSimpleName();
 
     // instance variables
-    public String uniqueID = null;
-    public String name = null;
-    public String email = null;
-    private Set<String> friendIDs = null;
-    private String latititude = null;
-    private String longitude = null;
+    public String name;
+    public String email;
 
     // User constructor
-    public User(String uniqueID, String name, String email) {
+    public User(String name, String email) {
         // assign the parameters to the instance variables
-        this.uniqueID = uniqueID;
         this.name = name;
         this.email = email;
-        this.latititude = "NOT_UPDATED";
-        this.longitude = "NOT_UPDATED";
     }
-
-    // Default constructor required for calls to DataSnapshot.getValue(User.class)
 }
