@@ -121,44 +121,9 @@ public class MainFragment extends Fragment implements Observer {
         distanceFromMark = rootView.findViewById(R.id.distanceFromMark);
 
         // Auth stuff
-        Name = (TextView)rootView.findViewById(R.id.profileName);
-        Email = (TextView)rootView.findViewById(R.id.profileEmail);
-        Uid = (TextView)rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
-        logout = (Button)rootView.findViewById(R.id.button_logout);
         user = mAuth.getCurrentUser();
 
-        // is there a current user?
-        if (user != null){
-            String email = user.getEmail();
-            String uid = user.getUid();
-            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("name");
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String name = dataSnapshot.getValue(String.class);
-                    Name.setText(name);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-            Email.setText(email);
-            Uid.setText(uid);
-        }
-
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(user !=null){
-                    mAuth.signOut();
-                    getActivity().finish();
-                    startActivity(new Intent(getContext(), LoginActivity.class));
-                }
-            }
-        });
 
         return rootView;
     }

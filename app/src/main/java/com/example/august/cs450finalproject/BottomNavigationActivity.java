@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class BottomNavigationActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener {
+public class BottomNavigationActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener {
 
     private TextView mTextMessage;
 
@@ -21,20 +21,16 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    //mTextMessage.setText(R.string.title_home);
-                    switchToFragment1();
+                    switchToFragment(1);
                     return true;
                 case R.id.navigation_dashboard:
-                    //mTextMessage.setText(R.string.title_dashboard);
-                    switchToFragment1();
+                    switchToFragment(2);
                     return true;
                 case R.id.navigation_notifications:
-                    //mTextMessage.setText(R.string.title_notifications);
-                    switchToFragment1();
+                    switchToFragment(3);
                     return true;
                 case R.id.navigation_profile:
-                    //mTextMessage.setText("Profile");
-                    switchToFragment1();
+                    switchToFragment(4);
                     return true;
             }
             return false;
@@ -46,14 +42,24 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottom_navigation);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.bottom_nav_container, new MainFragment()).commit();
     }
 
-    public void switchToFragment1() {
+    public void switchToFragment(int fragmentInt) {
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.fragment_main, new MainFragment()).commit();
+        if (fragmentInt == 1) {
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new MainFragment()).commit();
+        } else if (fragmentInt == 2) {
+            //manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+        } else if (fragmentInt == 3) {
+            //manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+        } else {
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+        }
     }
 
     @Override
