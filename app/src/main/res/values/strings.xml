@@ -6,4 +6,9 @@
     <string name="marked_latitude">MARKED LATITUDE:</string>
     <string name="mark_location">MARK LOCATION</string>
     <string name="distance_from_mark">DISTANCE FROM MARK:</string>
+    <string name="title_activity_bottom_navigation">BottomNavigationActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="profile">Profile</string>
 </resources>
