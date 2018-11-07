@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -86,7 +87,8 @@ public class RegisterActivity extends AppCompatActivity {
                                 // create the new user that will be added from the supplied parameters
                                 User newUser = new User(
                                         Name,
-                                        Email);
+                                        Email,
+                                        new GeoLocation(0, 0));
 
                                 DatabaseReference db = FirebaseDatabase.getInstance().getReference("Users");
                                 // set the value in the database under the unique ID

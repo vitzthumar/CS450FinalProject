@@ -202,11 +202,17 @@ public class MainFragment extends Fragment implements Observer {
 //        markedLat.setText(latString);
 //        markedLon.setText(lonString);
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child("7BGC0zZhxePk4lnybtdpZeMAdvt2");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
         GeoFire geoFire = new GeoFire(ref);
 
         // Set Location
-        geoFire.setLocation("location", new GeoLocation(37.7853889, 2.4056973), new GeoFire.CompletionListener() {
+        GeoLocation location;
+        if (user.getUid().equals("7BGC0zZhxePk4lnybtdpZeMAdvt2")) {
+            location = new GeoLocation(40.712776, -74.005974);
+        } else {
+            location = new GeoLocation(44.595631, -75.169228);
+        }
+        geoFire.setLocation("location", location, new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
                 if (error != null) {
@@ -250,14 +256,14 @@ public class MainFragment extends Fragment implements Observer {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                String name = (String) dataSnapshot.child("name").getValue();
-                String email = (String) dataSnapshot.child("email").getValue();
-                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
-
-                // TODO: Find a way to get this new User back to readUserFromDatabase()
-                User readUser = new User(name, email);
-                userCallback.onCallback(readUser);
-                Log.d(LOGTAG, "Read user is: " + uniqueID);
+//                String name = (String) dataSnapshot.child("name").getValue();
+//                String email = (String) dataSnapshot.child("email").getValue();
+//                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
+//
+//                // TODO: Find a way to get this new User back to readUserFromDatabase()
+//                User readUser = new User(name, email);
+//                userCallback.onCallback(readUser);
+//                Log.d(LOGTAG, "Read user is: " + uniqueID);
             }
 
             @Override

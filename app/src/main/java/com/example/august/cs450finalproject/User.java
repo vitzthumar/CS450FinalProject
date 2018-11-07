@@ -3,6 +3,7 @@ package com.example.august.cs450finalproject;
 import android.location.Location;
 import android.util.Log;
 
+import com.firebase.geofire.GeoLocation;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,11 +28,16 @@ public class User {
     // instance variables
     public String name;
     public String email;
+    public GeoLocation location;
+
+    // No arg constructor
+    public User () {}
 
     // User constructor
-    public User(String name, String email) {
+    public User(String name, String email, GeoLocation location) {
         // assign the parameters to the instance variables
         this.name = name;
         this.email = email;
+        this.location = location;
     }
 }

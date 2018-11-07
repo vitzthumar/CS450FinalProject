@@ -6,9 +6,19 @@
     tools:context=".DashboardFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:id="@+id/dashboard_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Dashboard Panel" />
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="101dp">
+
+        <TextView
+            android:id="@+id/dashboard_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
 
 </FrameLayout>
