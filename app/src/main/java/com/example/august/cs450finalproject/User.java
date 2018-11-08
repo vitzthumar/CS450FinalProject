@@ -40,4 +40,16 @@ public class User {
         this.email = email;
         this.location = location;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public GeoLocation getLocation() {
+        return location;
+    }
 }
