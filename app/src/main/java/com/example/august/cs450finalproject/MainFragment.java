@@ -252,7 +252,7 @@ public class MainFragment extends Fragment implements Observer {
                 String email = (String) dataSnapshot.child("email").getValue();
                 String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
 
-                // TODO: Find a way to get this new User back to readUserFromDatabase()
+                // callback which stores the read user
                 User readUser = new User(uniqueID, name, email);
                 userCallback.onCallback(readUser);
                 Log.d(LOGTAG, "Read user is: " + uniqueID);

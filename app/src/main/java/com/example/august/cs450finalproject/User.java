@@ -25,7 +25,6 @@ public class User {
     private final static String LOGTAG = User.class.getSimpleName();
 
     // instance variables
-    public String uniqueID = null;
     public String name = null;
     public String email = null;
     private Set<String> friendIDs = null;
@@ -35,7 +34,7 @@ public class User {
     // User constructor
     public User(String uniqueID, String name, String email) {
         // assign the parameters to the instance variables
-        this.uniqueID = uniqueID;
+        //this.uniqueID = uniqueID;
         this.name = name;
         this.email = email;
         this.latititude = "NOT_UPDATED";
