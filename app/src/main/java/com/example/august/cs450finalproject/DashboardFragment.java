@@ -80,9 +80,10 @@ public class DashboardFragment extends Fragment {
         final DatabaseReference db_ref = FirebaseDatabase.getInstance().getReference().child("Users");
 
         // Traverse all the users
-        db_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        db_ref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                dashboard_tv.setText("");
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     final String name = snapshot.child("name").getValue().toString();
                     final String email = snapshot.child("email").getValue().toString();
@@ -99,7 +100,6 @@ public class DashboardFragment extends Fragment {
                                 locs[0] = String.valueOf(location.latitude);
                                 locs[1] = String.valueOf(location.longitude);
                             }
-
                             dashboard_tv.append(name);
                             dashboard_tv.append("\n");
                             dashboard_tv.append(email);
