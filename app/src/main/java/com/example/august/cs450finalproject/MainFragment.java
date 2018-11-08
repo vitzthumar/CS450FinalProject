@@ -22,6 +22,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.LocationCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,11 +33,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashSet;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -44,15 +50,12 @@ public class MainFragment extends Fragment implements Observer {
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private TextView Name;
     private TextView Email;
     private TextView Uid;
     private Button logout;
-    // user location information
-    private double latitude;
-    private double longitude;
 
     private final static String LOGTAG = MainFragment.class.getSimpleName();
-
 
     private OnFragmentInteractionListener mListener;
     private final static int PERMISSION_REQUEST_CODE = 999;
@@ -123,40 +126,9 @@ public class MainFragment extends Fragment implements Observer {
         distanceFromMark = rootView.findViewById(R.id.distanceFromMark);
 
         // Auth stuff
-        Email = (TextView)rootView.findViewById(R.id.profileEmail);
-        Uid = (TextView)rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
-        logout = (Button)rootView.findViewById(R.id.button_logout);
         user = mAuth.getCurrentUser();
 
-        // is there a current user?
-        if (user != null){
-            String email = user.getEmail();
-            String uid = user.getUid();
-            Email.setText(email);
-            Uid.setText(uid);
-
-            // this user has been logged in/registered
-            DatabaseReference usersReference = this.database.getReference("Users");
-
-            // create the new user that will be added from the supplied parameters
-            User newUser = new User(user.getUid(), user.getEmail(), user.getEmail());
-
-            // set the value in the database under the unique ID
-            usersReference = usersReference.child(user.getUid());
-            usersReference.setValue(newUser);
-        }
-
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(user !=null){
-                    mAuth.signOut();
-                    getActivity().finish();
-                    startActivity(new Intent(getContext(), MainActivity.class));
-                }
-            }
-        });
 
         return rootView;
     }
@@ -167,8 +139,7 @@ public class MainFragment extends Fragment implements Observer {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -225,18 +196,58 @@ public class MainFragment extends Fragment implements Observer {
     // Method used to mark the user's current location
     private void markCurrentLocation() {
         // TODO: Fill this method
-        markedLocation = handler.getLocation();
-        String latString = "MARKED LATITUDE: " + Double.toString(markedLocation.getLatitude());
-        String lonString = "MARKED LONGITUDE: " + Double.toString(markedLocation.getLongitude());
+//        markedLocation = handler.getLocation();
+//        String latString = "MARKED LATITUDE: " + Double.toString(markedLocation.getLatitude());
+//        String lonString = "MARKED LONGITUDE: " + Double.toString(markedLocation.getLongitude());
+//
+//        markedLat.setText(latString);
+//        markedLon.setText(lonString);
 
-        markedLat.setText(latString);
-        markedLon.setText(lonString);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+        GeoFire geoFire = new GeoFire(ref);
+
+        // Set Location
+        GeoLocation location;
+        if (user.getUid().equals("7BGC0zZhxePk4lnybtdpZeMAdvt2")) {
+            location = new GeoLocation(40.712776, -74.005974);
+        } else {
+            location = new GeoLocation(44.595631, -75.169228);
+        }
+        geoFire.setLocation("location", location, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
+        // Get location
+//        geoFire.getLocation("location", new LocationCallback() {
+//            @Override
+//            public void onLocationResult(String key, GeoLocation location) {
+//                if (location != null) {
+//                    System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
+//                } else {
+//                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                System.err.println("There was an error getting the GeoFire location: " + databaseError);
+//            }
+//        });
 
         // TODO REMOVE THIS TEST
-        addFriend("skinny boy");
-        addFriend("fat boy");
+        addFriend("TestID1");
+        addFriend("TestID2");
+        updateUserLocation();
     }
 
+    /* NEEDS TO BE REWORKED
     // Read user from Firebase
     private void readUserFromDatabase(final String uniqueUserID, final UserCallback userCallback) {
 
@@ -248,14 +259,14 @@ public class MainFragment extends Fragment implements Observer {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                String name = (String) dataSnapshot.child("name").getValue();
-                String email = (String) dataSnapshot.child("email").getValue();
-                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
-
-                // callback which stores the read user
-                User readUser = new User(uniqueID, name, email);
-                userCallback.onCallback(readUser);
-                Log.d(LOGTAG, "Read user is: " + uniqueID);
+//                String name = (String) dataSnapshot.child("name").getValue();
+//                String email = (String) dataSnapshot.child("email").getValue();
+//                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
+//
+//                // TODO: Find a way to get this new User back to readUserFromDatabase()
+//                User readUser = new User(name, email);
+//                userCallback.onCallback(readUser);
+//                Log.d(LOGTAG, "Read user is: " + uniqueID);
             }
 
             @Override
@@ -265,32 +276,61 @@ public class MainFragment extends Fragment implements Observer {
             }
         });
     }
+    */
 
     // Update user's current location in Firebase
-    private void updateUserLocation(final double currentLat, final double currentLon) {
-        // access this user from the database and get specific components
-        final DatabaseReference usersReference = this.database.getReference("Users").child(user.getUid());
+    private void updateUserLocation() {
+        DatabaseReference locationReference = this.database.getReference("Locations");
+        GeoFire geoFire = new GeoFire(locationReference);
 
-        usersReference.addValueEventListener(new ValueEventListener() {
+        // Set Location
+        GeoLocation location;
+        location = new GeoLocation(40.712776, -74.005974);
+        geoFire.setLocation(user.getUid(), location, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
+    }
+
+    // Add a friend for this user
+    private void addFriend(String friendUserID) {
+        // access this user from the database and get specific components
+        DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
+        friendsReference.child(friendUserID).setValue(true);
+    }
+
+
+    /* NEEDS TO BE REWORKED
+    // Return a list of a user's friends given a user ID
+    private List<String> getListOfFriends(String uniqueUserID) {
+
+        final List<String> friendListBuilder = new ArrayList<String>();
+
+        DatabaseReference usersReference = this.database.getReference("Users").child(user.getUid());
+        usersReference.child("friends").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersReference.child("latitude").setValue(String.valueOf(currentLat));
-                usersReference.child("longitude").setValue(String.valueOf(currentLon));
-
-                Log.d(LOGTAG, "Updated lat/lon is: " + String.valueOf(currentLat) + "/" + String.valueOf(currentLon));
+                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                    friendListBuilder.add(currentSnapshot.getKey());
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(LOGTAG, "Encountered error while updating location");
+
             }
         });
-    }
 
-    // Add a friend for this user
-    private void addFriend(final String uniqueUserID) {
-        // access this user from the database and get specific components
-        DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
-        friendsReference.child(uniqueUserID).setValue("location");
+    return friendListBuilder;
     }
+    */
+
+
 }

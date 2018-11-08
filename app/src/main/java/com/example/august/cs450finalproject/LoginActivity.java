@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                             currentUser = mAuth.getCurrentUser();
                             finish();
                             startActivity(new Intent(getApplicationContext(),
-                                    MainActivity.class));
+                                    BottomNavigationActivity.class));
                         }else {
                             Toast.makeText(LoginActivity.this, "couldn't login",
                                     Toast.LENGTH_SHORT).show();
