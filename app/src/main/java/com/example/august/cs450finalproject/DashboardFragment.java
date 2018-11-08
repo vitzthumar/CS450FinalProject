@@ -76,34 +76,53 @@ public class DashboardFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
         dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
-        FirebaseDatabase.getInstance().getReference().child("Users")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            String name = snapshot.child("name").getValue().toString();
-                            String email = snapshot.child("email").getValue().toString();
-                            HashMap location = (HashMap) snapshot.child("location").getValue();
-                            ArrayList<Double> locs = (ArrayList<Double>) location.get("l");
-                            double lat = locs.get(0);
-                            double lng = locs.get(1);
+        // Get the reference to the DB
+        final DatabaseReference db_ref = FirebaseDatabase.getInstance().getReference().child("Users");
+
+        // Traverse all the users
+        db_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    final String name = snapshot.child("name").getValue().toString();
+                    final String email = snapshot.child("email").getValue().toString();
+                    final String[] locs = {"No latitude data", "No longitude data"};
+                    String lng;
+
+                    // This is the way to get the geoFire location
+                    String uuid = snapshot.getKey();
+                    GeoFire geoFire = new GeoFire(db_ref.child(uuid));
+                    geoFire.getLocation("location", new LocationCallback() {
+                        @Override
+                        public void onLocationResult(String key, GeoLocation location) {
+                            if (location != null) {
+                                locs[0] = String.valueOf(location.latitude);
+                                locs[1] = String.valueOf(location.longitude);
+                            }
 
                             dashboard_tv.append(name);
                             dashboard_tv.append("\n");
                             dashboard_tv.append(email);
                             dashboard_tv.append("\n");
-                            dashboard_tv.append(String.valueOf(lat));
+                            dashboard_tv.append(locs[0]); // latitude
                             dashboard_tv.append("\n");
-                            dashboard_tv.append(String.valueOf(lng));
+                            dashboard_tv.append(locs[1]); // longitude
                             dashboard_tv.append("\n");
                             dashboard_tv.append("--------------------\n");
                         }
 
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            System.err.println("There was an error getting the GeoFire location: " + databaseError);
+                        }
+                    });
+                }
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
 
         return rootView;
     }
