@@ -66,6 +66,7 @@ public class DashboardFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        adapter = new SimpleRVAdapter(this.users);
         setupFirebase();
         setupList();
         fetchUsers(100);
@@ -80,14 +81,9 @@ public class DashboardFragment extends Fragment {
 
         recyclerView = rootView.findViewById(R.id.dashboard_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         // Setup adapters here
-        ArrayList<User> testUsers = new ArrayList<>();
-        testUsers.add(new User("Nevaan Perera", "hhhh"));
-
-        adapter = new SimpleRVAdapter(this.users);
         recyclerView.setAdapter(adapter);
-
-        adapter.setUsers(testUsers);
 
         //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
@@ -184,11 +180,10 @@ public class DashboardFragment extends Fragment {
             private void newUser(User u) {
                 System.out.println("onDataChange: new user");
                 iterationCount++;
-                users.add(0, u);
+                users.add(u);
                 if (!fetchedUserIds && iterationCount == initialListSize) {
                     fetchedUserIds = true;
-
-                    // adapter.setUsers(users);
+                    adapter.setUsers(users);
                 } else if (fetchedUserIds) {
                     //adapter.notifyItemInserted(getIndexOfNewUser(u));
                 }

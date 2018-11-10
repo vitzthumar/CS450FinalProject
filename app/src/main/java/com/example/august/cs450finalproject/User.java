@@ -28,6 +28,8 @@ public class User {
     // instance variables
     public String name;
     public String email;
+    public String status;
+    public HashMap<String, Boolean> interests;
 
     // No arg constructor
     public User () {}
