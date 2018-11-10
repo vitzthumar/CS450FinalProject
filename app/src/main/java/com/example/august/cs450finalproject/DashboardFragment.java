@@ -42,7 +42,7 @@ public class DashboardFragment extends Fragment {
     private GeoFire geofire;
     private Set<GeoQuery> geoQueries = new HashSet<>();
 
-    private List<User> users = new ArrayList<>();
+    private ArrayList<User> users = new ArrayList<>();
     private ValueEventListener userValueListener;
     private boolean fetchedUserIds;
     private Set<String> userIdsWithListeners = new HashSet<>();
@@ -50,6 +50,9 @@ public class DashboardFragment extends Fragment {
     private int initialListSize;
     private Map<String, Location> userIdsToLocations = new HashMap<>();
     private int iterationCount;
+
+    private RecyclerView recyclerView;
+    private SimpleRVAdapter adapter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,6 +67,7 @@ public class DashboardFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         setupFirebase();
+        setupList();
         fetchUsers(100);
     }
 
@@ -74,14 +78,16 @@ public class DashboardFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        RecyclerView rv = rootView.findViewById(R.id.dashboard_recyclerView);
-        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView = rootView.findViewById(R.id.dashboard_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Setup adapters here
+        ArrayList<User> testUsers = new ArrayList<>();
+        testUsers.add(new User("Nevaan Perera", "hhhh"));
 
-        String[] strings = {"Hello", "Whats up", "Je m'appelle Nevaan", "Au revior", "Hola", "Kohomada", "Nieth"};
-        if (users.size() > 0) {
-            strings[0] = users.get(0).getName();
-        }
-        rv.setAdapter(new SimpleRVAdapter(strings));
+        adapter = new SimpleRVAdapter(this.users);
+        recyclerView.setAdapter(adapter);
+
+        adapter.setUsers(testUsers);
 
         //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
@@ -207,6 +213,9 @@ public class DashboardFragment extends Fragment {
         setupListeners();
     }
 
+    private void setupList() {
+    }
+
     private void removeListeners() {
         for (GeoQuery geoQuery : geoQueries) {
             geoQuery.removeAllListeners();
@@ -291,8 +300,8 @@ public class DashboardFragment extends Fragment {
      * A Simple Adapter for the RecyclerView
      */
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleViewHolder> {
-        private String[] dataSource;
-        public SimpleRVAdapter(String[] dataArgs){
+        private ArrayList<User> dataSource;
+        public SimpleRVAdapter(ArrayList<User> dataArgs){
             dataSource = dataArgs;
         }
 
@@ -305,12 +314,17 @@ public class DashboardFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
-            holder.textView.setText(dataSource[position]);
+            holder.textView.setText(dataSource.get(position).getName());
         }
 
         @Override
         public int getItemCount() {
-            return dataSource.length;
+            return dataSource.size();
+        }
+
+        public void setUsers(ArrayList<User> list) {
+            dataSource = list;
+            notifyDataSetChanged();
         }
     }
 
