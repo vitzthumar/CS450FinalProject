@@ -1,6 +1,7 @@
 package com.example.august.cs450finalproject;
 
 import android.content.Context;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,7 +14,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.firebase.geofire.LocationCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,9 +22,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DashboardFragment extends Fragment {
 
@@ -32,39 +35,24 @@ public class DashboardFragment extends Fragment {
     private TextView dashboard_tv;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
-    private HashMap<String, String> friends;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private DatabaseReference database;
+    private GeoFire geofire;
+    private Set<GeoQuery> geoQueries = new HashSet<>();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<User> users = new ArrayList<>();
+    private ValueEventListener userValueListener;
+    private boolean fetchedUserIds;
+    private Set<String> userIdsWithListeners = new HashSet<>();
+
+    private int initialListSize;
+    private Map<String, Location> userIdsToLocations = new HashMap<>();
+    private int iterationCount;
 
     private OnFragmentInteractionListener mListener;
 
     public DashboardFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment DashboardFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DashboardFragment newInstance(String param1, String param2) {
-        DashboardFragment fragment = new DashboardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -73,10 +61,8 @@ public class DashboardFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        friends = new HashMap<>();
-
-        fetchFriends();
-
+        setupFirebase();
+        fetchUsers(100);
     }
 
     @Override
@@ -87,33 +73,69 @@ public class DashboardFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
         dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
-        DatabaseReference locationReference = FirebaseDatabase.getInstance().getReference("Locations");
+        return rootView;
+    }
 
-        GeoFire geoFire = new GeoFire(locationReference);
-
+    /***
+     * This function fetches everyone (for now) who are within a certain radius passed into the parameter.
+     * It then attaches an even listener to all the "User" objects that are associated in the radius.
+     * Make this so it only fetches friends
+     */
+    private void fetchUsers (int radius) {
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(40.712776, -74.005974), 100);
+        GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(40.712776, -74.005974), radius);
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                getUser(key, 1);
+                System.out.println(key + "is in the area; Adding event listener to it");
+                Location to = new Location("to");
+                to.setLatitude(location.latitude);
+                to.setLongitude(location.longitude);
+                if (!fetchedUserIds) {
+                    userIdsToLocations.put(key, to);
+                } else {
+                    userIdsToLocations.put(key, to);
+                    addUserListener(key);
+                }
             }
 
             @Override
             public void onKeyExited(String key) {
-                getUser(key, 0);
+                System.out.println(key + "left the area; Removing event listener from it");
+                removeUserListener(key);
             }
 
             @Override
             public void onKeyMoved(String key, GeoLocation location) {
-                getUser(key, 2);
+                System.out.println(key + "moved in the area");
             }
 
             @Override
             public void onGeoQueryReady() {
                 System.out.println("All initial data has been loaded and events have been fired!\n");
+                initialListSize = userIdsToLocations.size();
+                if (initialListSize == 0) {
+                    fetchedUserIds = true;
+                }
+                iterationCount = 0;
+
+                userIdsToLocations.keySet().forEach(this::addUserListener);
+            }
+
+            private void addUserListener(String userId) {
+                database.child("Users").child(userId)
+                        .addValueEventListener(userValueListener);
+
+                userIdsWithListeners.add(userId);
+            }
+
+            private void removeUserListener(String userId) {
+                database.child("Users").child(userId)
+                        .removeEventListener(userValueListener);
+
+                userIdsWithListeners.remove(userId);
             }
 
             @Override
@@ -122,7 +144,65 @@ public class DashboardFragment extends Fragment {
             }
         });
 
-        return rootView;
+        geoQueries.add(geoQuery);
+    }
+
+    private void setupListeners() {
+        userValueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User u = dataSnapshot.getValue(User.class);
+                // Set some user info here?
+                if (users.contains(u)) {
+                    userUpdated(u);
+                } else {
+                    newUser(u);
+                }
+
+                dashboard_tv.append(u.getName() + "is in the area");
+            }
+
+            private void newUser(User u) {
+                System.out.println("onDataChange: new user");
+                iterationCount++;
+                users.add(0, u);
+                if (!fetchedUserIds && iterationCount == initialListSize) {
+                    fetchedUserIds = true;
+
+                    // adapter.setUsers(users);
+                } else if (fetchedUserIds) {
+                    //adapter.notifyItemInserted(getIndexOfNewUser(u));
+                }
+            }
+
+            private void userUpdated(User u) {
+                System.out.println("onDataChange: update");
+                users.add(u);
+                //adapter.notifyItemChanged(position);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+    }
+
+    private void setupFirebase() {
+        database = FirebaseDatabase.getInstance().getReference();
+        geofire = new GeoFire(database.child("Locations"));
+        setupListeners();
+    }
+
+    private void removeListeners() {
+        for (GeoQuery geoQuery : geoQueries) {
+            geoQuery.removeAllListeners();
+        }
+
+        for (String userId : userIdsWithListeners) {
+            database.child("users").child(userId)
+                    .removeEventListener(userValueListener);
+        }
     }
 
     private double distance(double startLat, double startLong, double endLat, double endLong) {
@@ -146,34 +226,6 @@ public class DashboardFragment extends Fragment {
 
         System.out.println("Distance Travlled: " + EARTH_RADIUS * c + " [KM]");
         return EARTH_RADIUS * c; // <-- dist (in KILOMETERS)
-    }
-
-    /***
-     *
-     * @param userId - uuid of user
-     * @param flag - If 1: User entered the area, if 0 user left the area, if 2 - user moved
-     */
-    private void getUser(String userId, final int flag) {
-        FirebaseDatabase.getInstance().getReference("Users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (flag == 1) {
-                    dashboard_tv.append(dataSnapshot.child("name").getValue().toString() + " entered the area.\n");
-                } else if (flag == 0) {
-                    dashboard_tv.append(dataSnapshot.child("name").getValue().toString() + " left the area.\n");
-                } else {
-                    dashboard_tv.append(dataSnapshot.child("name").getValue().toString() + " moved.\n");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchFriends() {
     }
 
     private static double haversin(double val) {
@@ -202,6 +254,7 @@ public class DashboardFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        removeListeners();
     }
 
     /**

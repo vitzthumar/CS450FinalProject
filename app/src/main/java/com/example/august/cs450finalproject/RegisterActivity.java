@@ -87,8 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 // create the new user that will be added from the supplied parameters
                                 User newUser = new User(
                                         Name,
-                                        Email,
-                                        new GeoLocation(0, 0));
+                                        Email);
 
                                 DatabaseReference db = FirebaseDatabase.getInstance().getReference("Users");
                                 // set the value in the database under the unique ID

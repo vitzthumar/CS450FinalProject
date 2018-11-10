@@ -28,17 +28,15 @@ public class User {
     // instance variables
     public String name;
     public String email;
-    public GeoLocation location;
 
     // No arg constructor
     public User () {}
 
     // User constructor
-    public User(String name, String email, GeoLocation location) {
+    public User(String name, String email) {
         // assign the parameters to the instance variables
         this.name = name;
         this.email = email;
-        this.location = location;
     }
 
     public String getName() {
@@ -47,9 +45,5 @@ public class User {
 
     public String getEmail() {
         return email;
-    }
-
-    public GeoLocation getLocation() {
-        return location;
     }
 }
