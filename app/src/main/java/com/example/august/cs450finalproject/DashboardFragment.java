@@ -119,11 +119,12 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onKeyExited(String key) {
                 System.out.println(key + "left the area; Removing event listener from it");
-                removeUserListener(key);
                 if (userIdsWithListeners.contains(key)) {
                     int position = getUserPosition(key);
                     users.remove(position);
                     adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, users.size());
+                    removeUserListener(key);
                 }
             }
 
@@ -177,7 +178,6 @@ public class DashboardFragment extends Fragment {
                     userUpdated(u);
                 } else {
                     newUser(u);
-                    //dashboard_tv.append(u.getName() + " is in the area\n");
                 }
             }
 
