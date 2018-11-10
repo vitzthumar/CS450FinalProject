@@ -120,7 +120,11 @@ public class DashboardFragment extends Fragment {
             public void onKeyExited(String key) {
                 System.out.println(key + "left the area; Removing event listener from it");
                 removeUserListener(key);
-                //dashboard_tv.append(key + " left the area\n");
+                if (userIdsWithListeners.contains(key)) {
+                    int position = getUserPosition(key);
+                    users.remove(position);
+                    adapter.notifyItemRemoved(position);
+                }
             }
 
             @Override
@@ -168,7 +172,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
-                // Set some user info here?
+                u.setUuid(dataSnapshot.getKey());
                 if (users.contains(u)) {
                     userUpdated(u);
                 } else {
@@ -185,14 +189,14 @@ public class DashboardFragment extends Fragment {
                     fetchedUserIds = true;
                     adapter.setUsers(users);
                 } else if (fetchedUserIds) {
-                    //adapter.notifyItemInserted(getIndexOfNewUser(u));
+                    adapter.notifyItemChanged(getIndexOfNewUser(u));
                 }
             }
 
             private void userUpdated(User u) {
                 System.out.println("onDataChange: update");
                 users.add(u);
-                //adapter.notifyItemChanged(position);
+                adapter.notifyItemChanged(getUserPosition(u.getUuid()));
             }
 
             @Override
@@ -209,6 +213,26 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupList() {
+    }
+
+    // Change thses so it gets by ID
+    private int getIndexOfNewUser(User u) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUuid().equals(u.getUuid())) {
+                return i;
+            }
+        }
+        throw new RuntimeException();
+    }
+
+    // Change these so it gets by ID
+    private int getUserPosition(String id) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUuid().equals(id)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void removeListeners() {

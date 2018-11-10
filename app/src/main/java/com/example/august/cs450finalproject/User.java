@@ -28,8 +28,7 @@ public class User {
     // instance variables
     public String name;
     public String email;
-    public String status;
-    public HashMap<String, Boolean> interests;
+    public String uuid;
 
     // No arg constructor
     public User () {}
@@ -39,6 +38,7 @@ public class User {
         // assign the parameters to the instance variables
         this.name = name;
         this.email = email;
+        this.uuid = null;
     }
 
     public String getName() {
@@ -47,5 +47,13 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
