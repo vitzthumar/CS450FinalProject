@@ -5,6 +5,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +73,18 @@ public class DashboardFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
+
+        RecyclerView rv = rootView.findViewById(R.id.dashboard_recyclerView);
+        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        String[] strings = {"Hello", "Whats up", "Je m'appelle Nevaan", "Au revior", "Hola", "Kohomada", "Nieth"};
+        if (users.size() > 0) {
+            strings[0] = users.get(0).getName();
+        }
+        rv.setAdapter(new SimpleRVAdapter(strings));
+
+        //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
+
 
         return rootView;
     }
@@ -105,7 +118,7 @@ public class DashboardFragment extends Fragment {
             public void onKeyExited(String key) {
                 System.out.println(key + "left the area; Removing event listener from it");
                 removeUserListener(key);
-                dashboard_tv.append(key + " left the area\n");
+                //dashboard_tv.append(key + " left the area\n");
             }
 
             @Override
@@ -158,7 +171,7 @@ public class DashboardFragment extends Fragment {
                     userUpdated(u);
                 } else {
                     newUser(u);
-                    dashboard_tv.append(u.getName() + " is in the area\n");
+                    //dashboard_tv.append(u.getName() + " is in the area\n");
                 }
             }
 
@@ -270,5 +283,45 @@ public class DashboardFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    // RECYCLER VIEW STUFF
+
+    /**
+     * A Simple Adapter for the RecyclerView
+     */
+    public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleViewHolder> {
+        private String[] dataSource;
+        public SimpleRVAdapter(String[] dataArgs){
+            dataSource = dataArgs;
+        }
+
+        @Override
+        public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = new TextView(parent.getContext());
+            SimpleViewHolder viewHolder = new SimpleViewHolder(view);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(SimpleViewHolder holder, int position) {
+            holder.textView.setText(dataSource[position]);
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataSource.length;
+        }
+    }
+
+    /**
+     * A Simple ViewHolder for the RecyclerView
+     */
+    public static class SimpleViewHolder extends RecyclerView.ViewHolder{
+        public TextView textView;
+        public SimpleViewHolder(View itemView) {
+            super(itemView);
+            textView = (TextView) itemView;
+        }
     }
 }
