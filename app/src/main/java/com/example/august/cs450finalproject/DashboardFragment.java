@@ -105,6 +105,7 @@ public class DashboardFragment extends Fragment {
             public void onKeyExited(String key) {
                 System.out.println(key + "left the area; Removing event listener from it");
                 removeUserListener(key);
+                dashboard_tv.append(key + " left the area\n");
             }
 
             @Override
@@ -157,9 +158,8 @@ public class DashboardFragment extends Fragment {
                     userUpdated(u);
                 } else {
                     newUser(u);
+                    dashboard_tv.append(u.getName() + " is in the area\n");
                 }
-
-                dashboard_tv.append(u.getName() + "is in the area");
             }
 
             private void newUser(User u) {
