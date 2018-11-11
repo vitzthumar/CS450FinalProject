@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -71,10 +72,33 @@ public class User {
     }
 
     public String getDistanceTo(GeoLocation userLocation) {
-        Double userLat = userLocation.latitude;
-        Double userLng = userLocation.longitude;
+        DecimalFormat df = new DecimalFormat("###.##");
+        return df.format(distance(this.lat, this.lng, userLocation.latitude, userLocation.longitude)) + "KM";
+    }
 
-        Double distanceToUser = userLat - this.lat + userLng - this.lng;
-        return String.valueOf(distanceToUser);
+    private double distance(double startLat, double startLong, double endLat, double endLong) {
+
+        final int EARTH_RADIUS = 6371; // Approx Earth radius in KM
+
+        // TODO remove these printlns
+        System.out.println("Calculating...");
+        System.out.println("startLat " + startLat);
+        System.out.println("startLon " + startLong);
+        System.out.println("endLat " + endLat);
+        System.out.println("endLong " + endLong);
+        double dLat  = Math.toRadians((endLat - startLat));
+        double dLong = Math.toRadians((endLong - startLong));
+
+        startLat = Math.toRadians(startLat);
+        endLat   = Math.toRadians(endLat);
+
+        double a = haversin(dLat) + Math.cos(startLat) * Math.cos(endLat) * haversin(dLong);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c; // <-- dist (in KILOMETERS)
+    }
+
+    private static double haversin(double val) {
+        return Math.pow(Math.sin(val / 2), 2);
     }
 }
