@@ -1,17 +1,25 @@
 package com.example.august.cs450finalproject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.databinding.ViewDataBinding;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.LocationCallback;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,49 +28,44 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import android.databinding.DataBindingUtil;
 
 public class DashboardFragment extends Fragment {
 
     // Instance Variables
-    private ArrayList<User> allUsers;
-    private User me;
     private TextView dashboard_tv;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private DatabaseReference database;
+    private GeoFire geofire;
+    private Set<GeoQuery> geoQueries = new HashSet<>();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private ArrayList<User> users = new ArrayList<>();
+    private ValueEventListener userValueListener;
+    private boolean fetchedUserIds;
+    private Set<String> userIdsWithListeners = new HashSet<>();
+
+    private int initialListSize;
+    private Map<String, Location> userIdsToLocations = new HashMap<>();
+    private int iterationCount;
+
+    private RecyclerView recyclerView;
+    private SimpleRVAdapter adapter;
 
     private OnFragmentInteractionListener mListener;
 
+    private GeoLocation USERS_CURRENT_LOCATION;
+
     public DashboardFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment DashboardFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DashboardFragment newInstance(String param1, String param2) {
-        DashboardFragment fragment = new DashboardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -71,7 +74,11 @@ public class DashboardFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-
+        adapter = new SimpleRVAdapter(this.users);
+        USERS_CURRENT_LOCATION = getCurrentUsersLocation();
+        setupFirebase();
+        setupList();
+        fetchUsers(100);
     }
 
     @Override
@@ -80,143 +87,175 @@ public class DashboardFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
-        // Get the reference to the DB
-        final DatabaseReference db_ref = FirebaseDatabase.getInstance().getReference().child("Users");
+        recyclerView = rootView.findViewById(R.id.dashboard_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Get me
-        final DatabaseReference myRef = db_ref.child(user.getUid());
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Setup adapters here
+        recyclerView.setAdapter(adapter);
+
+        //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
+
+
+        return rootView;
+    }
+
+    /***
+     * This function fetches everyone (for now) who are within a certain radius passed into the parameter.
+     * It then attaches an even listener to all the "User" objects that are associated in the radius.
+     * Make this so it only fetches friends
+     */
+    private void fetchUsers (int radius) {
+        // Get everyone within 100KM
+        // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
+        GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                System.out.println(key + "is in the area; Adding event listener to it");
+                Location to = new Location("to");
+                to.setLatitude(location.latitude);
+                to.setLongitude(location.longitude);
+                if (!fetchedUserIds) {
+                    userIdsToLocations.put(key, to);
+                } else {
+                    userIdsToLocations.put(key, to);
+                    addUserListener(key);
+                }
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                System.out.println(key + "left the area; Removing event listener from it");
+                if (userIdsWithListeners.contains(key)) {
+                    int position = getUserPosition(key);
+                    users.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, users.size());
+                    removeUserListener(key);
+                }
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                System.out.println(key + "moved in the area");
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                System.out.println("All initial data has been loaded and events have been fired!\n");
+                initialListSize = userIdsToLocations.size();
+                if (initialListSize == 0) {
+                    fetchedUserIds = true;
+                }
+                iterationCount = 0;
+
+                userIdsToLocations.keySet().forEach(this::addUserListener);
+            }
+
+            private void addUserListener(String userId) {
+                database.child("Users").child(userId)
+                        .addValueEventListener(userValueListener);
+
+                userIdsWithListeners.add(userId);
+            }
+
+            private void removeUserListener(String userId) {
+                database.child("Users").child(userId)
+                        .removeEventListener(userValueListener);
+
+                userIdsWithListeners.remove(userId);
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                System.err.println("There was an error with this query: " + error);
+            }
+        });
+
+        geoQueries.add(geoQuery);
+    }
+
+    private void setupListeners() {
+        userValueListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final String name = dataSnapshot.child("name").getValue().toString();
-                final String email = dataSnapshot.child("email").getValue().toString();
+                User u = dataSnapshot.getValue(User.class);
+                u.setUuid(dataSnapshot.getKey());
+                Location location = userIdsToLocations.get(dataSnapshot.getKey());
+                u.setLat(location.getLatitude());
+                u.setLng(location.getLongitude());
+                if (users.contains(u)) {
+                    userUpdated(u);
+                } else {
+                    newUser(u);
+                }
+            }
 
-                // This is the way to get the geoFire location
-                GeoFire geoFire = new GeoFire(myRef);
-                geoFire.getLocation("location", new LocationCallback() {
-                    @Override
-                    public void onLocationResult(String key, GeoLocation location) {
-                        if (location != null) {
-                            me = new User(name, email, new GeoLocation(location.latitude, location.longitude));
+            private void newUser(User u) {
+                System.out.println("onDataChange: new user");
+                iterationCount++;
+                users.add(u);
+                if (!fetchedUserIds && iterationCount == initialListSize) {
+                    fetchedUserIds = true;
+                    adapter.setUsers(users);
+                } else if (fetchedUserIds) {
+                    adapter.notifyItemChanged(getIndexOfNewUser(u));
+                }
+            }
 
-
-                            // Now that we have a user object. Travers all other members
-                            db_ref.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(final DataSnapshot dataSnapshot) {
-                                    dashboard_tv.setText("");
-                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                        // Get the user Id of whats being traversed
-                                        String uuid = snapshot.getKey();
-
-                                        // Do not traverse the curren users info
-                                        if (!uuid.equals(user.getUid())) {
-                                            final String name = snapshot.child("name").getValue().toString();
-                                            final String email = snapshot.child("email").getValue().toString();
-                                            final String[] locs = {"No latitude data", "No longitude data"};
-
-                                            // This is the way to get the geoFire location
-                                            GeoFire geoFire = new GeoFire(db_ref.child(uuid));
-                                            geoFire.getLocation("location", new LocationCallback() {
-                                                @Override
-                                                public void onLocationResult(String key, GeoLocation location) {
-                                                    if (location != null) {
-                                                        locs[0] = String.valueOf(location.latitude);
-                                                        locs[1] = String.valueOf(location.longitude);
-
-                                                        dashboard_tv.append(name);
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(email);
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(locs[0]); // latitude
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(locs[1]); // longitude
-                                                        dashboard_tv.append("\n");
-                                                        double d = distance(
-                                                                me.getLocation().latitude,
-                                                                me.getLocation().longitude,
-                                                                location.latitude,
-                                                                location.longitude
-                                                        );
-                                                        DecimalFormat df = new DecimalFormat("###.##");
-                                                        dashboard_tv.append("Distance to " + name + " is: " + df.format(d) + "KM");
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append("--------------------\n");
-                                                    } else {
-                                                        dashboard_tv.append(name);
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(email);
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(locs[0]); // latitude
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append(locs[1]); // longitude
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append("Cannot find distance to " + name + ". No location data found"); // longitude
-                                                        dashboard_tv.append("\n");
-                                                        dashboard_tv.append("--------------------\n");
-                                                    }
-                                                }
-
-                                                @Override
-                                                public void onCancelled(DatabaseError databaseError) {
-                                                    System.err.println("There was an error getting the GeoFire location: " + databaseError);
-                                                }
-                                            });
-                                        }
-                                    }
-
-                                }
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                }
-                            });
-
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("There was an error getting the GeoFire location: " + databaseError);
-                    }
-                });
+            private void userUpdated(User u) {
+                System.out.println("onDataChange: update");
+                users.add(u);
+                adapter.notifyItemChanged(getUserPosition(u.getUuid()));
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
-
-        return rootView;
+        };
     }
 
-    private double distance(double startLat, double startLong, double endLat, double endLong) {
-
-        final int EARTH_RADIUS = 6371; // Approx Earth radius in KM
-
-        // TODO remove these printlns
-        System.out.println("Calculating...");
-        System.out.println("startLat " + startLat);
-        System.out.println("startLon " + startLong);
-        System.out.println("endLat " + endLat);
-        System.out.println("endLong " + endLong);
-        double dLat  = Math.toRadians((endLat - startLat));
-        double dLong = Math.toRadians((endLong - startLong));
-
-        startLat = Math.toRadians(startLat);
-        endLat   = Math.toRadians(endLat);
-
-        double a = haversin(dLat) + Math.cos(startLat) * Math.cos(endLat) * haversin(dLong);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        System.out.println("Distance Travlled: " + EARTH_RADIUS * c + " [KM]");
-        return EARTH_RADIUS * c; // <-- dist (in KILOMETERS)
+    private void setupFirebase() {
+        database = FirebaseDatabase.getInstance().getReference();
+        geofire = new GeoFire(database.child("Locations"));
+        setupListeners();
     }
 
-    private static double haversin(double val) {
-        return Math.pow(Math.sin(val / 2), 2);
+    private void setupList() {
+    }
+
+    // Change thses so it gets by ID
+    private int getIndexOfNewUser(User u) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUuid().equals(u.getUuid())) {
+                return i;
+            }
+        }
+        throw new RuntimeException();
+    }
+
+    // Change these so it gets by ID
+    private int getUserPosition(String id) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUuid().equals(id)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void removeListeners() {
+        for (GeoQuery geoQuery : geoQueries) {
+            geoQuery.removeAllListeners();
+        }
+
+        for (String userId : userIdsWithListeners) {
+            database.child("users").child(userId)
+                    .removeEventListener(userValueListener);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -241,6 +280,19 @@ public class DashboardFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        removeListeners();
+    }
+
+    public User getUser(int position) {
+        if (position > users.size() - 1) {
+            return new User();
+        } else {
+            return users.get(position);
+        }
+    }
+
+    public GeoLocation getCurrentUsersLocation() {
+        return new GeoLocation(40.712776, -74.005974);
     }
 
     /**
@@ -256,5 +308,85 @@ public class DashboardFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    // RECYCLER VIEW STUFF
+
+    /**
+     * A Simple Adapter for the RecyclerView
+     */
+    public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
+        private ArrayList<User> dataSource;
+
+        public SimpleRVAdapter(ArrayList<User> dataArgs){
+            dataSource = dataArgs;
+        }
+
+        @Override
+        public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_list_item, parent, false);
+            SimpleViewHolder viewHolder = new SimpleViewHolder(v);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(SimpleViewHolder holder, int position) {
+            holder.friendListName.setText(dataSource.get(position).getName());
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataSource.size();
+        }
+
+        public void setUsers(ArrayList<User> list) {
+            dataSource = list;
+            notifyDataSetChanged();
+        }
+
+        /**
+         * A Simple ViewHolder for the RecyclerView
+         */
+        class SimpleViewHolder extends RecyclerView.ViewHolder{
+            public TextView friendListName;
+
+            public SimpleViewHolder(View itemView) {
+                super(itemView);
+                friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                Context c = itemView.getContext();
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        User u = dataSource.get(getAdapterPosition());
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
+                        builder1.setMessage(
+                                "Name: " + u.getName() + "\n" +
+                                "Email: " + u.getEmail() + "\n" +
+                                "Distance to you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
+                        );
+                        builder1.setCancelable(true);
+
+                        builder1.setPositiveButton(
+                                "Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        builder1.setNegativeButton(
+                                "See on Map",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
+                    }
+                });
+            }
+        }
     }
 }

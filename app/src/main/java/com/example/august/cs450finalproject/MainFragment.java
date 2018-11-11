@@ -50,10 +50,6 @@ public class MainFragment extends Fragment implements Observer {
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
-    private TextView Name;
-    private TextView Email;
-    private TextView Uid;
-    private Button logout;
 
     private final static String LOGTAG = MainFragment.class.getSimpleName();
 
@@ -207,12 +203,7 @@ public class MainFragment extends Fragment implements Observer {
         GeoFire geoFire = new GeoFire(ref);
 
         // Set Location
-        GeoLocation location;
-        if (user.getUid().equals("7BGC0zZhxePk4lnybtdpZeMAdvt2")) {
-            location = new GeoLocation(40.712776, -74.005974);
-        } else {
-            location = new GeoLocation(44.595631, -75.169228);
-        }
+        GeoLocation location = new GeoLocation(40.712776, -74.005974);
         geoFire.setLocation("location", location, new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
@@ -223,23 +214,6 @@ public class MainFragment extends Fragment implements Observer {
                 }
             }
         });
-
-        // Get location
-//        geoFire.getLocation("location", new LocationCallback() {
-//            @Override
-//            public void onLocationResult(String key, GeoLocation location) {
-//                if (location != null) {
-//                    System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-//                } else {
-//                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                System.err.println("There was an error getting the GeoFire location: " + databaseError);
-//            }
-//        });
 
         // TODO REMOVE THIS TEST
         addFriend("TestID1");
