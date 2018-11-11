@@ -1,6 +1,7 @@
 package com.example.august.cs450finalproject;
 
 import android.content.Context;
+import android.databinding.ViewDataBinding;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import android.databinding.DataBindingUtil;
 
 public class DashboardFragment extends Fragment {
 
@@ -299,6 +302,14 @@ public class DashboardFragment extends Fragment {
         removeListeners();
     }
 
+    public User getUser(int position) {
+        if (position > users.size() - 1) {
+            return new User();
+        } else {
+            return users.get(position);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -319,7 +330,7 @@ public class DashboardFragment extends Fragment {
     /**
      * A Simple Adapter for the RecyclerView
      */
-    public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleViewHolder> {
+    public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
         private ArrayList<User> dataSource;
 
         public SimpleRVAdapter(ArrayList<User> dataArgs){
@@ -347,24 +358,25 @@ public class DashboardFragment extends Fragment {
             dataSource = list;
             notifyDataSetChanged();
         }
-    }
 
-    /**
-     * A Simple ViewHolder for the RecyclerView
-     */
-    public static class SimpleViewHolder extends RecyclerView.ViewHolder{
-        public TextView friendListName;
+        /**
+         * A Simple ViewHolder for the RecyclerView
+         */
+        class SimpleViewHolder extends RecyclerView.ViewHolder{
+            public TextView friendListName;
 
-        public SimpleViewHolder(View itemView) {
-            super(itemView);
-            friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
-            Context c = itemView.getContext();
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(c, "Hello World!", Toast.LENGTH_SHORT).show();
-                }
-            });
+            public SimpleViewHolder(View itemView) {
+                super(itemView);
+                friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                Context c = itemView.getContext();
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        User u = dataSource.get(getAdapterPosition());
+                        Toast.makeText(c, u.getName(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 }
