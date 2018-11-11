@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -335,7 +336,6 @@ public class DashboardFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
-            holder.friendListDistance.setText(dataSource.get(position).getEmail());
         }
 
         @Override
@@ -354,13 +354,17 @@ public class DashboardFragment extends Fragment {
      */
     public static class SimpleViewHolder extends RecyclerView.ViewHolder{
         public TextView friendListName;
-        public TextView friendListDistance;
-
 
         public SimpleViewHolder(View itemView) {
             super(itemView);
             friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
-            friendListDistance = (TextView) itemView.findViewById(R.id.friend_list_item_distcance);
+            Context c = itemView.getContext();
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(c, "Hello World!", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 }
