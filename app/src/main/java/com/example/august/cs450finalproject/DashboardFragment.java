@@ -1,6 +1,8 @@
 package com.example.august.cs450finalproject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.databinding.ViewDataBinding;
 import android.location.Location;
 import android.net.Uri;
@@ -60,6 +62,8 @@ public class DashboardFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private GeoLocation USERS_CURRENT_LOCATION;
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -71,6 +75,7 @@ public class DashboardFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         adapter = new SimpleRVAdapter(this.users);
+        USERS_CURRENT_LOCATION = getCurrentUsersLocation();
         setupFirebase();
         setupList();
         fetchUsers(100);
@@ -103,7 +108,7 @@ public class DashboardFragment extends Fragment {
     private void fetchUsers (int radius) {
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
-        GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(40.712776, -74.005974), radius);
+        GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
@@ -178,6 +183,9 @@ public class DashboardFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
                 u.setUuid(dataSnapshot.getKey());
+                Location location = userIdsToLocations.get(dataSnapshot.getKey());
+                u.setLat(location.getLatitude());
+                u.setLng(location.getLongitude());
                 if (users.contains(u)) {
                     userUpdated(u);
                 } else {
@@ -310,6 +318,10 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    public GeoLocation getCurrentUsersLocation() {
+        return new GeoLocation(40.712776, -74.005974);
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -373,7 +385,32 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         User u = dataSource.get(getAdapterPosition());
-                        Toast.makeText(c, u.getName(), Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
+                        builder1.setMessage(
+                                "Name: " + u.getName() + "\n" +
+                                "Email: " + u.getEmail() + "\n" +
+                                "Distance to you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
+                        );
+                        builder1.setCancelable(true);
+
+                        builder1.setPositiveButton(
+                                "Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        builder1.setNegativeButton(
+                                "See on Map",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
                     }
                 });
             }

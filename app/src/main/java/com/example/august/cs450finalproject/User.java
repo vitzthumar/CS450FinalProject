@@ -29,9 +29,19 @@ public class User {
     public String name;
     public String email;
     public String uuid;
+    public Double lat;
+    public Double lng;
 
     // No arg constructor
     public User () {}
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
 
     // User constructor
     public User(String name, String email) {
@@ -39,6 +49,9 @@ public class User {
         this.name = name;
         this.email = email;
         this.uuid = null;
+        this.lat = null;
+        this.lng = null;
+
     }
 
     public String getName() {
@@ -55,5 +68,13 @@ public class User {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getDistanceTo(GeoLocation userLocation) {
+        Double userLat = userLocation.latitude;
+        Double userLng = userLocation.longitude;
+
+        Double distanceToUser = userLat - this.lat + userLng - this.lng;
+        return String.valueOf(distanceToUser);
     }
 }
