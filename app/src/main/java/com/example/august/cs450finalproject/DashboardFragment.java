@@ -320,20 +320,22 @@ public class DashboardFragment extends Fragment {
      */
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleViewHolder> {
         private ArrayList<User> dataSource;
+
         public SimpleRVAdapter(ArrayList<User> dataArgs){
             dataSource = dataArgs;
         }
 
         @Override
         public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = new TextView(parent.getContext());
-            SimpleViewHolder viewHolder = new SimpleViewHolder(view);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_list_item, parent, false);
+            SimpleViewHolder viewHolder = new SimpleViewHolder(v);
             return viewHolder;
         }
 
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
-            holder.textView.setText(dataSource.get(position).getName());
+            holder.friendListName.setText(dataSource.get(position).getName());
+            holder.friendListDistance.setText(dataSource.get(position).getEmail());
         }
 
         @Override
@@ -351,10 +353,14 @@ public class DashboardFragment extends Fragment {
      * A Simple ViewHolder for the RecyclerView
      */
     public static class SimpleViewHolder extends RecyclerView.ViewHolder{
-        public TextView textView;
+        public TextView friendListName;
+        public TextView friendListDistance;
+
+
         public SimpleViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView;
+            friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+            friendListDistance = (TextView) itemView.findViewById(R.id.friend_list_item_distcance);
         }
     }
 }
