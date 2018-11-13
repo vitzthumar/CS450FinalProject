@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainFragment extends Fragment implements Observer {
+public class MainFragment extends Fragment {
 
     // Auth stuff
     private FirebaseAuth mAuth;
@@ -56,17 +56,6 @@ public class MainFragment extends Fragment implements Observer {
     private OnFragmentInteractionListener mListener;
     private final static int PERMISSION_REQUEST_CODE = 999;
     private LocationHandler handler = null;
-
-    // views
-    TextView currentLat;
-    TextView currentLon;
-    Button markLocation;
-    TextView markedLat;
-    TextView markedLon;
-    TextView distanceFromMark;
-
-    Location currentLocation = null;
-    Location markedLocation = null;
 
     // Firebase instance
     FirebaseDatabase database = null;
@@ -83,19 +72,7 @@ public class MainFragment extends Fragment implements Observer {
         // set the Firebase instance
         this.database = FirebaseDatabase.getInstance();
 
-        if (handler == null) {
-            this.handler = new LocationHandler(getActivity());
-            this.handler.addObserver(this);
-        }
 
-        // check permissions
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE
-            );
-        }
     }
 
     @Override
@@ -106,27 +83,58 @@ public class MainFragment extends Fragment implements Observer {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        // find the views by ID
-        currentLat = rootView.findViewById(R.id.currentLatitude);
-        currentLon = rootView.findViewById(R.id.currentLongitude);
-        markLocation = rootView.findViewById(R.id.markLocation);
-        markLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // execute a method every time this button is clicked
-                markCurrentLocation();
-            }
-        });
-        markedLat = rootView.findViewById(R.id.markedLatitude);
-        markedLon = rootView.findViewById(R.id.markedLongitude);
-        distanceFromMark = rootView.findViewById(R.id.distanceFromMark);
-
         // Auth stuff
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
+        getInitialLocation();
 
         return rootView;
+    }
+
+    private void getInitialLocation() {
+
+        Thread locationThread = new Thread() {
+            @Override
+            public void run() {
+                // get a new handler if there is no existing one
+                if (handler == null) {
+                    // check permissions
+                    handler = new LocationHandler(getActivity());
+                    if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+                    }
+                }
+                Location location = handler.getLocation();
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
+
+                // update this user's location with new location
+                updateUserLocation(location);
+            }
+        };
+        locationThread.start();
+    }
+
+    // Update user's current location in Firebase
+    private void updateUserLocation(Location userLocation) {
+        DatabaseReference locationReference = this.database.getReference("Locations");
+        GeoFire geoFire = new GeoFire(locationReference);
+
+        // Set Location
+        GeoLocation location;
+        location = new GeoLocation(userLocation.getLatitude(), userLocation.getLongitude());
+        geoFire.setLocation(user.getUid(), location, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
     }
 
     @Override
@@ -145,101 +153,12 @@ public class MainFragment extends Fragment implements Observer {
         mListener = null;
     }
 
-    @Override
-    public void update(Observable observable, Object o) {
-        if (observable instanceof LocationHandler) {
-            currentLocation = (Location) o;
-            final double lat = currentLocation.getLatitude();
-            final double lon = currentLocation.getLongitude();
-
-            // TODO FIX HOW LOCATION GETS UPDATED
-            //updateUserLocation(lat, lon);
-
-            String latString = "CURRENT LATITUDE: " + Double.toString(lat);
-            String lonString = "CURRENT LONGITUDE: " + Double.toString(lon);
-
-            currentLat.setText(latString);
-            currentLon.setText(lonString);
-        }
-
-        if (markedLocation != null) {
-            double startLat = currentLocation.getLatitude();
-            double endLat = markedLocation.getLatitude();
-            double startLon = currentLocation.getLongitude();
-            double endLon = currentLocation.getLatitude();
-
-            double dLat  = Math.toRadians((endLat - startLat));
-            double dLon = Math.toRadians((endLon - startLon));
-
-            startLat = Math.toRadians(startLat);
-            endLat   = Math.toRadians(endLat);
-
-            double a = Math.pow(Math.sin(dLat / 2), 2) + Math.cos(startLat) * Math.cos(endLat) * Math.pow(Math.sin(dLon / 2), 2);
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            double distanceInMeters = (6371 * c) / 1000;
-            String distanceString = "DISTANCE FROM MARK: " + distanceInMeters + " METERS";
-            // set the text on the text view
-            distanceFromMark.setText(distanceString);
-        }
-    }
-
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
-    // Method used to mark the user's current location
-    private void markCurrentLocation() {
-        // TODO: Fill this method
-//        markedLocation = handler.getLocation();
-//        String latString = "MARKED LATITUDE: " + Double.toString(markedLocation.getLatitude());
-//        String lonString = "MARKED LONGITUDE: " + Double.toString(markedLocation.getLongitude());
-//
-//        markedLat.setText(latString);
-//        markedLon.setText(lonString);
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-        GeoFire geoFire = new GeoFire(ref);
-
-        // Set Location
-        GeoLocation location = new GeoLocation(40.712776, -74.005974);
-        geoFire.setLocation("location", location, new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error != null) {
-                    System.err.println("There was an error saving the location to GeoFire: " + error);
-                } else {
-                    System.out.println("Location saved on server successfully!");
-                }
-            }
-        });
-
-        // TODO REMOVE THIS TEST
-        addFriend("TestID1");
-        addFriend("TestID2");
-        updateUserLocation();
-    }
-
-    // Update user's current location in Firebase
-    private void updateUserLocation() {
-        DatabaseReference locationReference = this.database.getReference("Locations");
-        GeoFire geoFire = new GeoFire(locationReference);
-
-        // Set Location
-        GeoLocation location;
-        location = new GeoLocation(40.712776, -74.005974);
-        geoFire.setLocation(user.getUid(), location, new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error != null) {
-                    System.err.println("There was an error saving the location to GeoFire: " + error);
-                } else {
-                    System.out.println("Location saved on server successfully!");
-                }
-            }
-        });
-    }
 
     // Add a friend for this user
     private void addFriend(String friendUserID) {

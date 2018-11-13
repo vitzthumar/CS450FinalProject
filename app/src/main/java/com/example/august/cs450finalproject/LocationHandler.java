@@ -7,12 +7,16 @@ import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import java.security.Provider;
 import java.util.Observable;
+
+import static android.location.Criteria.ACCURACY_FINE;
 
 public class LocationHandler extends Observable implements LocationListener {
 
@@ -22,54 +26,9 @@ public class LocationHandler extends Observable implements LocationListener {
 
     public LocationHandler(Activity activity) {
         this.activity = activity;
-        this.locationManager = (LocationManager) this.activity.getSystemService(
-                Context.LOCATION_SERVICE);
-
-        if (this.activity.checkSelfPermission(
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    5000,
-                    0,
-                    this);
-            locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    5000,
-                    0,
-                    this);
-            locationManager.requestLocationUpdates(
-                    LocationManager.PASSIVE_PROVIDER,
-                    5000,
-                    0,
-                    this);
-
-            // check for initial GPS coordinate
-            Location l =
-                    locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-            if (l != null) {
-                setChanged();
-                notifyObservers(l);
-                return;
-            }
-
-            l = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (l != null) {
-                setChanged();
-                notifyObservers(l);
-                return;
-            }
-
-            l = locationManager.getLastKnownLocation(
-                    LocationManager.PASSIVE_PROVIDER);
-            if (l != null) {
-                setChanged();
-                notifyObservers(l);
-                return;
-            }
-        }
+        this.locationManager = (LocationManager) this.activity.getSystemService(Context.LOCATION_SERVICE);
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -93,45 +52,13 @@ public class LocationHandler extends Observable implements LocationListener {
     }
 
     protected Location getLocation() {
-        if (this.activity.checkSelfPermission(
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    5000,
-                    0,
-                    this);
-            locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    5000,
-                    0,
-                    this);
-            locationManager.requestLocationUpdates(
-                    LocationManager.PASSIVE_PROVIDER,
-                    5000,
-                    0,
-                    this);
+        if (this.activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            // check for initial GPS coordinate
-            Location l =
-                    locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Criteria criteria = new Criteria();
+            Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
 
-            if (l != null) {
-                return l;
-            }
-
-            l = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (l != null) {
-                return l;
-            }
-
-            l = locationManager.getLastKnownLocation(
-                    LocationManager.PASSIVE_PROVIDER);
-            if (l != null) {
-                return l;
-            }
+            return location;
         }
-
         return null;
     }
 }

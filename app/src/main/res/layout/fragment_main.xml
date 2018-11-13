@@ -6,58 +6,18 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <LinearLayout
+    <EditText
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendRequest"
         android:gravity="center"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:hint="type in a userID"/>
 
-        <TextView
-            android:id="@+id/currentLatitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-
-            android:text="@string/current_latitude" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/currentLongitude"
-            android:gravity="center"
-
-            android:text="@string/current_longitude"/>
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/markLocation"
-            android:gravity="center"
-            android:text="@string/mark_location" />
-
-        <TextView
-            android:id="@+id/markedLatitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/marked_latitude" />
-
-        <TextView
-            android:id="@+id/markedLongitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/marked_longitude" />
-
-        <TextView
-            android:id="@+id/distanceFromMark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/distance_from_mark" />
-
-    </LinearLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendRequestButton"
+        android:gravity="center"
+        android:text="SEND REQUEST"/>
 
 </LinearLayout>
