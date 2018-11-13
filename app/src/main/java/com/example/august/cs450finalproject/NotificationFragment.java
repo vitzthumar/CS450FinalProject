@@ -149,10 +149,6 @@ public class NotificationFragment extends Fragment {
                 friendsReference.child(pendingET.getText().toString()).setValue("pending");
             }
         });
-
-
-
-
         return rootView;
     }
 
@@ -179,6 +175,8 @@ public class NotificationFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -259,10 +257,26 @@ public class NotificationFragment extends Fragment {
                                     }
                                 });
 
+                        builder1.setNeutralButton("Accept",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        updateRelationship(u.uuid, "friends");
+                                        removeUserFromRV(u.uuid);
+                                        dialog.cancel();
+                                    }
+                                });
+
                         builder1.setNegativeButton(
-                                "See on Map",
+                                "Decline",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
+                                        updateRelationship(u.uuid, "declined");
+                                        removeUserFromRV(u.uuid);
+
+
+
+
                                         dialog.cancel();
                                     }
                                 });
@@ -275,4 +289,30 @@ public class NotificationFragment extends Fragment {
         }
     }
 
+    private void updateRelationship(String userID, String relationship) {
+        // access this user from the database and get specific components
+        DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
+
+        if (relationship == "declined") {
+            // if declined, remove the user from the Friends list
+            friendsReference.child(userID).removeValue();
+        } else {
+            // update the user to the new relationship
+            friendsReference.child(userID).setValue(relationship);
+            // update from the other user's end as well
+            friendsReference = database.child("Friends").child(userID);
+            friendsReference.child(user.getUid()).setValue(relationship);
+        }
+    }
+
+    // Change these so it gets by ID
+    private void removeUserFromRV(String id) {
+        for (int i = 0; i < pendingFriends.size(); i++) {
+            if (pendingFriends.get(i).getUuid().equals(id)) {
+                pendingFriends.remove(i);
+                adapter.notifyItemRemoved(i);
+                adapter.notifyItemRangeChanged(i, pendingFriends.size());
+            }
+        }
+    }
 }

@@ -71,8 +71,6 @@ public class MainFragment extends Fragment {
 
         // set the Firebase instance
         this.database = FirebaseDatabase.getInstance();
-
-
     }
 
     @Override
@@ -159,11 +157,11 @@ public class MainFragment extends Fragment {
     }
 
 
-
+/*
     // Add a friend for this user
     private void addFriend(String friendUserID) {
         // access this user from the database and get specific components
         DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
         friendsReference.child(friendUserID).setValue(true);
-    }
+    }*/
 }
