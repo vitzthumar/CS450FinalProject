@@ -221,37 +221,6 @@ public class MainFragment extends Fragment implements Observer {
         updateUserLocation();
     }
 
-    /* NEEDS TO BE REWORKED
-    // Read user from Firebase
-    private void readUserFromDatabase(final String uniqueUserID, final UserCallback userCallback) {
-
-        // access the user from the database and get specific components
-        DatabaseReference usersReference = this.database.getReference("Users").child(uniqueUserID);
-
-
-        usersReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-//                String name = (String) dataSnapshot.child("name").getValue();
-//                String email = (String) dataSnapshot.child("email").getValue();
-//                String uniqueID = (String) dataSnapshot.child("uniqueID").getValue();
-//
-//                // TODO: Find a way to get this new User back to readUserFromDatabase()
-//                User readUser = new User(name, email);
-//                userCallback.onCallback(readUser);
-//                Log.d(LOGTAG, "Read user is: " + uniqueID);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                userCallback.onCallback(null);
-                Log.e(LOGTAG, "Encountered error while reading user");
-            }
-        });
-    }
-    */
-
     // Update user's current location in Firebase
     private void updateUserLocation() {
         DatabaseReference locationReference = this.database.getReference("Locations");
@@ -270,7 +239,6 @@ public class MainFragment extends Fragment implements Observer {
                 }
             }
         });
-
     }
 
     // Add a friend for this user
@@ -279,32 +247,4 @@ public class MainFragment extends Fragment implements Observer {
         DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
         friendsReference.child(friendUserID).setValue(true);
     }
-
-
-    /* NEEDS TO BE REWORKED
-    // Return a list of a user's friends given a user ID
-    private List<String> getListOfFriends(String uniqueUserID) {
-
-        final List<String> friendListBuilder = new ArrayList<String>();
-
-        DatabaseReference usersReference = this.database.getReference("Users").child(user.getUid());
-        usersReference.child("friends").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
-                    friendListBuilder.add(currentSnapshot.getKey());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    return friendListBuilder;
-    }
-    */
-
-
 }

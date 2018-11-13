@@ -1,12 +1,30 @@
 package com.example.august.cs450finalproject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 
 /**
@@ -18,14 +36,18 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class NotificationFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // Instance Variables
+    private TextView dashboard_tv;
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+    private DatabaseReference database;
+
+    private RecyclerView recyclerView;
+    private SimpleRVAdapter adapter;
+    private ValueEventListener userValueListener;
+
+    private ArrayList<User> pendingFriends = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
 
@@ -33,20 +55,14 @@ public class NotificationFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment NotificationFragment.
-     */
+    private EditText pendingET;
+    private Button pendingBT;
+
     // TODO: Rename and change types and number of parameters
     public static NotificationFragment newInstance(String param1, String param2) {
         NotificationFragment fragment = new NotificationFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,16 +71,89 @@ public class NotificationFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        setupListeners();
+        adapter = new SimpleRVAdapter(this.pendingFriends);
+        database = FirebaseDatabase.getInstance().getReference();
+
+        // get all the pending users
+        DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
+        friendsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                    // is the user a pending friend request?
+                    if (currentSnapshot.getValue().equals("pending")) {
+                        addUserListener(currentSnapshot.getKey());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void addUserListener(String userId) {
+        database.child("Users").child(userId)
+                .addValueEventListener(userValueListener);
+    }
+
+    private void setupListeners() {
+        userValueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User u = dataSnapshot.getValue(User.class);
+                u.setUuid(dataSnapshot.getKey());
+                if (!pendingFriends.contains(u)) {
+                    newUser(u);
+                }
+            }
+
+            private void newUser(User u) {
+                pendingFriends.add(u);
+                adapter.setUsers(pendingFriends);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notification, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_notification, container, false);
+        recyclerView = rootView.findViewById(R.id.notification_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Setup adapters here
+        adapter = new SimpleRVAdapter(pendingFriends);
+        recyclerView.setAdapter(adapter);
+
+        this.pendingET = rootView.findViewById(R.id.pendingET);
+        this.pendingBT = rootView.findViewById(R.id.pendingBT);
+        pendingBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
+                friendsReference.child(pendingET.getText().toString()).setValue("pending");
+            }
+        });
+
+
+
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -105,4 +194,85 @@ public class NotificationFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    // RECYCLER VIEW STUFF
+
+    /**
+     * A Simple Adapter for the RecyclerView
+     */
+    public class SimpleRVAdapter extends RecyclerView.Adapter<NotificationFragment.SimpleRVAdapter.SimpleViewHolder> {
+        private ArrayList<User> dataSource;
+
+        public SimpleRVAdapter(ArrayList<User> dataArgs){
+            dataSource = dataArgs;
+        }
+
+        @Override
+        public NotificationFragment.SimpleRVAdapter.SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_list_item, parent, false);
+            NotificationFragment.SimpleRVAdapter.SimpleViewHolder viewHolder = new NotificationFragment.SimpleRVAdapter.SimpleViewHolder(v);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(NotificationFragment.SimpleRVAdapter.SimpleViewHolder holder, int position) {
+            holder.friendListName.setText(dataSource.get(position).getName());
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataSource.size();
+        }
+
+        public void setUsers(ArrayList<User> list) {
+            dataSource = list;
+            notifyDataSetChanged();
+        }
+
+        /**
+         * A Simple ViewHolder for the RecyclerView
+         */
+        class SimpleViewHolder extends RecyclerView.ViewHolder{
+            public TextView friendListName;
+
+            public SimpleViewHolder(View itemView) {
+                super(itemView);
+                friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                Context c = itemView.getContext();
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        User u = dataSource.get(getAdapterPosition());
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
+                        builder1.setMessage(
+                                "Name: " + u.getName() + "\n" +
+                                        "Email: " + u.getEmail() + "\n"
+
+                        );
+                        builder1.setCancelable(true);
+
+                        builder1.setPositiveButton(
+                                "Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        builder1.setNegativeButton(
+                                "See on Map",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
+                    }
+                });
+            }
+        }
+    }
+
 }
