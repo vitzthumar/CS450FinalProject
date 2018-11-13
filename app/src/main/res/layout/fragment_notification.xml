@@ -5,10 +5,38 @@
     android:layout_height="match_parent"
     tools:context=".NotificationFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Notification Fragment" />
+        android:orientation="vertical">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/notification_recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        </android.support.v7.widget.RecyclerView>
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:id="@+id/pendingET"
+            android:text="yvurL1qwSaVKIJOL6odyyTzyzKi2"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/pendingBT"
+            android:layout_weight=".5"
+            android:text="SEND REQUEST"/>
+
+
+    </LinearLayout>
+
+
 
 </FrameLayout>
