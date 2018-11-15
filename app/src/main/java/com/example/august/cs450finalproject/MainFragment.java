@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 
@@ -57,6 +58,9 @@ public class MainFragment extends Fragment {
     private final static int PERMISSION_REQUEST_CODE = 999;
     private LocationHandler handler = null;
 
+    private EditText enterUserEmail = null;
+    private Button sendFriendRequest = null;
+
     // Firebase instance
     FirebaseDatabase database = null;
 
@@ -85,10 +89,80 @@ public class MainFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
+        /*
+        // initialize the views
+        enterUserEmail = rootView.findViewById(R.id.sendRequestEditText);
+        sendFriendRequest = rootView.findViewById(R.id.sendRequestButton);
+        sendFriendRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+                // TODO: FIX THE FRIEND REQUEST
+
+
+                Thread friendRequestThread = new Thread() {
+                    @Override
+                    public void run() {
+                        // send the the user whose email is in the text field a friend request
+                        String userEmail = enterUserEmail.getText().toString();
+                        if (!userEmail.equals("")) {
+                            // disable the friend request button
+                            sendFriendRequest.setEnabled(false);
+                            // find the ID given the email
+                            findUserIDFromEmail(userEmail);
+                        }
+                    }
+                };
+                friendRequestThread.start();
+            }
+        });
+        */
+
         getInitialLocation();
 
         return rootView;
     }
+
+    // Find a user's ID given their email
+    private void findUserIDFromEmail(String userEmail) {
+
+        DatabaseReference usersReference = database.getReference().child("Users");
+        usersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                    // check this child to see if its email matches the passed email
+                    if (currentSnapshot.child("Email").hasChild(userEmail)) {
+                        // send this user a request given their ID
+                        sendFriendRequest(currentSnapshot.getKey());
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // re-enable the friend request button
+                sendFriendRequest.setEnabled(true);
+            }
+        });
+    }
+
+    // Send a friend request given a user's ID
+    private void sendFriendRequest(String userID) {
+        DatabaseReference friendsReference = database.getReference().child("Friends").child(user.getUid());
+        friendsReference.child(userID).setValue("pending");
+    }
+
 
     private void getInitialLocation() {
 

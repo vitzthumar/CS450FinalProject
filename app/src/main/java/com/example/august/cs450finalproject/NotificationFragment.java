@@ -305,7 +305,7 @@ public class NotificationFragment extends Fragment {
         }
     }
 
-    // Change these so it gets by ID
+    // Remove a user entry from the pending request recycler view
     private void removeUserFromRV(String id) {
         for (int i = 0; i < pendingFriends.size(); i++) {
             if (pendingFriends.get(i).getUuid().equals(id)) {
