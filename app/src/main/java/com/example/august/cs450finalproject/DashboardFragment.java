@@ -1,12 +1,14 @@
 package com.example.august.cs450finalproject;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.databinding.ViewDataBinding;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -31,11 +32,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.databinding.DataBindingUtil;
 
 public class DashboardFragment extends Fragment {
 
@@ -64,6 +63,13 @@ public class DashboardFragment extends Fragment {
 
     private GeoLocation USERS_CURRENT_LOCATION;
 
+    private final static int PERMISSION_REQUEST_CODE = 999;
+    private LocationHandler handler = null;
+
+    private final static String FRIEND = "friends";
+    private boolean friendsLoaded;
+    private HashSet<String> usersFriends = new HashSet<>();
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -71,14 +77,31 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.friendsLoaded = false;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         adapter = new SimpleRVAdapter(this.users);
-        USERS_CURRENT_LOCATION = getCurrentUsersLocation();
         setupFirebase();
         setupList();
-        fetchUsers(100);
+
+        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getValue().equals(FRIEND)) {
+                        System.out.println(snapshot.getKey() + " is a friend");
+                        usersFriends.add(snapshot.getKey());
+                    }
+                }
+                // After loading the friends. Get the location, and fetch all friends in the area
+                getCurrentUsersLocation();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -108,31 +131,36 @@ public class DashboardFragment extends Fragment {
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);
+        System.out.println("QUERRYING ON " + USERS_CURRENT_LOCATION.latitude + ", " + USERS_CURRENT_LOCATION.longitude);
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                System.out.println(key + "is in the area; Adding event listener to it");
-                Location to = new Location("to");
-                to.setLatitude(location.latitude);
-                to.setLongitude(location.longitude);
-                if (!fetchedUserIds) {
-                    userIdsToLocations.put(key, to);
-                } else {
-                    userIdsToLocations.put(key, to);
-                    addUserListener(key);
+                if (usersFriends.contains(key)) {
+                    System.out.println(key + "is in the area; Adding event listener to it");
+                    Location to = new Location("to");
+                    to.setLatitude(location.latitude);
+                    to.setLongitude(location.longitude);
+                    if (!fetchedUserIds) {
+                        userIdsToLocations.put(key, to);
+                    } else {
+                        userIdsToLocations.put(key, to);
+                        addUserListener(key);
+                    }
                 }
             }
 
             @Override
             public void onKeyExited(String key) {
-                System.out.println(key + "left the area; Removing event listener from it");
-                if (userIdsWithListeners.contains(key)) {
-                    int position = getUserPosition(key);
-                    users.remove(position);
-                    adapter.notifyItemRemoved(position);
-                    adapter.notifyItemRangeChanged(position, users.size());
-                    removeUserListener(key);
+                if (usersFriends.contains(key)) {
+                    System.out.println(key + "left the area; Removing event listener from it");
+                    if (userIdsWithListeners.contains(key)) {
+                        int position = getUserPosition(key);
+                        users.remove(position);
+                        adapter.notifyItemRemoved(position);
+                        adapter.notifyItemRangeChanged(position, users.size());
+                        removeUserListener(key);
+                    }
                 }
             }
 
@@ -151,6 +179,11 @@ public class DashboardFragment extends Fragment {
                 iterationCount = 0;
 
                 userIdsToLocations.keySet().forEach(this::addUserListener);
+                for (String aFriendID: usersFriends) {
+                    if (!userIdsToLocations.containsKey(aFriendID)) {
+                        System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
+                    }
+                }
             }
 
             private void addUserListener(String userId) {
@@ -317,30 +350,37 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    public GeoLocation getCurrentUsersLocation() {
-        return new GeoLocation(40.712776, -74.005974);
+    public void getCurrentUsersLocation() {
+        Thread locationThread = new Thread() {
+            @Override
+            public void run() {
+                // get a new handler if there is no existing one
+                if (handler == null) {
+                    // check permissions
+                    handler = new LocationHandler(getActivity());
+                    if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+                    }
+                }
+                Location location;
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
+                // update this user's location with new location
+                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
+                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                fetchUsers(100);
+            }
+        };
+        locationThread.start();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
     // RECYCLER VIEW STUFF
-
-    /**
-     * A Simple Adapter for the RecyclerView
-     */
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
         private ArrayList<User> dataSource;
 

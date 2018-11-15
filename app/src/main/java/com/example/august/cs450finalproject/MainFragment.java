@@ -108,8 +108,12 @@ public class MainFragment extends Fragment {
                     location = handler.getLocation();
                 } while (location == null);
 
+                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
                 // update this user's location with new location
-                updateUserLocation(location);
+                Location l = new Location("to");
+                l.setLatitude(44.58964199);
+                l.setLongitude(-75.16173201);
+                updateUserLocation(l);
             }
         };
         locationThread.start();
