@@ -4,31 +4,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
+
+    private final static String LOGTAG = ProfileFragment.class.getSimpleName();
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -36,15 +39,22 @@ public class ProfileFragment extends Fragment {
     private TextView Email;
     private TextView Uid;
     private Button logout;
+    private Button deleteAccount;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    // radius views
+    private TextView radiusTextView;
+    private SeekBar radiusSeekBar;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // toggle buttons
+    private ToggleButton button1;
+    private ToggleButton button2;
+    private ToggleButton button3;
+    private ToggleButton button4;
+    private ToggleButton button5;
+    private ToggleButton button6;
+    private ToggleButton button7;
+    private ToggleButton button8;
+    private ToggleButton button9;
 
     private OnFragmentInteractionListener mListener;
 
@@ -52,31 +62,9 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -86,11 +74,12 @@ public class ProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         // Auth stuff
-        Name = (TextView)rootView.findViewById(R.id.profileName);
-        Email = (TextView)rootView.findViewById(R.id.profileEmail);
-        Uid = (TextView)rootView.findViewById(R.id.profileUid);
+        Name = rootView.findViewById(R.id.profileName);
+        Email = rootView.findViewById(R.id.profileEmail);
+        Uid = rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
-        logout = (Button)rootView.findViewById(R.id.button_logout);
+        logout = rootView.findViewById(R.id.button_logout);
+        deleteAccount = rootView.findViewById(R.id.button_delete_account);
         user = mAuth.getCurrentUser();
 
         // is there a current user?
@@ -113,7 +102,7 @@ public class ProfileFragment extends Fragment {
             Email.setText(email);
             Uid.setText(uid);
         }
-
+        // logout and delete account on click listeners
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,8 +113,121 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: fix this
+            }
+        });
+        // radius and seekbar
+        radiusTextView = rootView.findViewById(R.id.radius_text_view);
+        radiusSeekBar = rootView.findViewById(R.id.radius_seek_bar);
+        radiusSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        radiusTextView.setText("Radius: " + radiusSeekBar.getProgress() + " kilometers");
+
+        // preferences
+        button1 = rootView.findViewById(R.id.toggle_button1);
+        button2 = rootView.findViewById(R.id.toggle_button2);
+        button3 = rootView.findViewById(R.id.toggle_button3);
+        button4 = rootView.findViewById(R.id.toggle_button4);
+        button5 = rootView.findViewById(R.id.toggle_button5);
+        button6 = rootView.findViewById(R.id.toggle_button6);
+        button7 = rootView.findViewById(R.id.toggle_button7);
+        button8 = rootView.findViewById(R.id.toggle_button8);
+        button9 = rootView.findViewById(R.id.toggle_button9);
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // set the buttons to the checked values in Firebase
+                button1.setChecked(dataSnapshot.child(getResources().getString(R.string.preference1)).getValue(Boolean.class));
+                button2.setChecked(dataSnapshot.child(getResources().getString(R.string.preference2)).getValue(Boolean.class));
+                button3.setChecked(dataSnapshot.child(getResources().getString(R.string.preference3)).getValue(Boolean.class));
+                button4.setChecked(dataSnapshot.child(getResources().getString(R.string.preference4)).getValue(Boolean.class));
+                button5.setChecked(dataSnapshot.child(getResources().getString(R.string.preference5)).getValue(Boolean.class));
+                button6.setChecked(dataSnapshot.child(getResources().getString(R.string.preference6)).getValue(Boolean.class));
+                button7.setChecked(dataSnapshot.child(getResources().getString(R.string.preference7)).getValue(Boolean.class));
+                button8.setChecked(dataSnapshot.child(getResources().getString(R.string.preference8)).getValue(Boolean.class));
+                button9.setChecked(dataSnapshot.child(getResources().getString(R.string.preference9)).getValue(Boolean.class));
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        // toggle button click listeners
+        button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button1);
+            }
+        });
+        button2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button2);
+            }
+        });
+        button3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button3);
+            }
+        });
+        button4.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button4);
+            }
+        });
+        button5.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button5);
+            }
+        });
+        button6.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button6);
+            }
+        });
+        button7.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button7);
+            }
+        });
+        button8.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button8);
+            }
+        });
+        button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button9);
+            }
+        });
 
         return rootView;
+    }
+
+    SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int currentRadius, boolean b) {
+            // update the radius text view continuously as the user adjusts the SeekBar
+            radiusTextView.setText("Radius: " + currentRadius + " kilometers");
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // called when the user first touches the SeekBar, so do nothing
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // the user has has finished moving the SeekBar, update their radius in Firebase
+            DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+            userReference.child("radius").setValue(seekBar.getProgress());
+        }
+    };
+
+    // Run this whenever a preference is changed
+    private void buttonToggled(boolean isChecked, ToggleButton button) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+        userReference.child(String.valueOf(button.getTextOn())).setValue(isChecked);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -152,16 +254,6 @@ public class ProfileFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
