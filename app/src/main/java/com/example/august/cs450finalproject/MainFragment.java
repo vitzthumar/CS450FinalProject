@@ -58,9 +58,6 @@ public class MainFragment extends Fragment {
     private final static int PERMISSION_REQUEST_CODE = 999;
     private LocationHandler handler = null;
 
-    private EditText enterUserEmail = null;
-    private Button sendFriendRequest = null;
-
     // Firebase instance
     FirebaseDatabase database = null;
 
@@ -93,45 +90,6 @@ public class MainFragment extends Fragment {
 
         return rootView;
     }
-
-    // Find a user's ID given their email
-    private void findUserIDFromEmail(String userEmail) {
-
-        DatabaseReference usersReference = database.getReference().child("Users");
-        usersReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
-                    // check this child to see if its email matches the passed email
-                    if (currentSnapshot.child("Email").hasChild(userEmail)) {
-                        // send this user a request given their ID
-                        sendFriendRequest(currentSnapshot.getKey());
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // re-enable the friend request button
-                sendFriendRequest.setEnabled(true);
-            }
-        });
-    }
-
-    // Send a friend request given a user's ID
-    private void sendFriendRequest(String userID) {
-        DatabaseReference friendsReference = database.getReference().child("Friends").child(user.getUid());
-        friendsReference.child(userID).setValue("pending");
-    }
-
 
     private void getInitialLocation() {
 
@@ -202,13 +160,4 @@ public class MainFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
-
-/*
-    // Add a friend for this user
-    private void addFriend(String friendUserID) {
-        // access this user from the database and get specific components
-        DatabaseReference friendsReference = this.database.getReference("Friends").child(user.getUid());
-        friendsReference.child(friendUserID).setValue(true);
-    }*/
 }

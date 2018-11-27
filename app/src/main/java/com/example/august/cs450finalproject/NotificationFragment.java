@@ -176,18 +176,6 @@ public class NotificationFragment extends Fragment {
         mListener = null;
     }
 
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
@@ -315,4 +303,45 @@ public class NotificationFragment extends Fragment {
             }
         }
     }
+
+    /*
+    // Find a user's ID given their email
+    private void findUserIDFromEmail(String userEmail) {
+
+        DatabaseReference usersReference = database.getReference().child("Users");
+        usersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                    // check this child to see if its email matches the passed email
+                    if (currentSnapshot.child("Email").hasChild(userEmail)) {
+                        // send this user a request given their ID
+                        sendFriendRequest(currentSnapshot.getKey());
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // re-enable the friend request button
+                sendFriendRequest.setEnabled(true);
+            }
+        });
+    }
+
+    // Send a friend request given a user's ID
+    private void sendFriendRequest(String userID) {
+        DatabaseReference friendsReference = database.getReference().child("Friends").child(user.getUid());
+        friendsReference.child(userID).setValue("pending");
+    }
+    */
+
 }
