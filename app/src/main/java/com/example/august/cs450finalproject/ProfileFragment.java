@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,15 +21,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
     // Auth stuff
     private FirebaseAuth mAuth;
@@ -37,14 +30,16 @@ public class ProfileFragment extends Fragment {
     private TextView Uid;
     private Button logout;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // toggle buttons
+    private ToggleButton button1;
+    private ToggleButton button2;
+    private ToggleButton button3;
+    private ToggleButton button4;
+    private ToggleButton button5;
+    private ToggleButton button6;
+    private ToggleButton button7;
+    private ToggleButton button8;
+    private ToggleButton button9;
 
     private OnFragmentInteractionListener mListener;
 
@@ -52,31 +47,10 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -124,8 +98,91 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+        // preferences
+        button1 = rootView.findViewById(R.id.toggle_button1);
+        button2 = rootView.findViewById(R.id.toggle_button2);
+        button3 = rootView.findViewById(R.id.toggle_button3);
+        button4 = rootView.findViewById(R.id.toggle_button4);
+        button5 = rootView.findViewById(R.id.toggle_button5);
+        button6 = rootView.findViewById(R.id.toggle_button6);
+        button7 = rootView.findViewById(R.id.toggle_button7);
+        button8 = rootView.findViewById(R.id.toggle_button8);
+        button9 = rootView.findViewById(R.id.toggle_button9);
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // set the buttons to the checked values in Firebase
+                button1.setChecked(dataSnapshot.child(getResources().getString(R.string.preference1)).getValue(Boolean.class));
+                button2.setChecked(dataSnapshot.child(getResources().getString(R.string.preference2)).getValue(Boolean.class));
+                button3.setChecked(dataSnapshot.child(getResources().getString(R.string.preference3)).getValue(Boolean.class));
+                button4.setChecked(dataSnapshot.child(getResources().getString(R.string.preference4)).getValue(Boolean.class));
+                button5.setChecked(dataSnapshot.child(getResources().getString(R.string.preference5)).getValue(Boolean.class));
+                button6.setChecked(dataSnapshot.child(getResources().getString(R.string.preference6)).getValue(Boolean.class));
+                button7.setChecked(dataSnapshot.child(getResources().getString(R.string.preference7)).getValue(Boolean.class));
+                button8.setChecked(dataSnapshot.child(getResources().getString(R.string.preference8)).getValue(Boolean.class));
+                button9.setChecked(dataSnapshot.child(getResources().getString(R.string.preference9)).getValue(Boolean.class));
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+
+        // toggle button click listeners
+        button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button1);
+            }
+        });
+        button2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button2);
+            }
+        });
+        button3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button3);
+            }
+        });
+        button4.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button4);
+            }
+        });
+        button5.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button5);
+            }
+        });
+        button6.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button6);
+            }
+        });
+        button7.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button7);
+            }
+        });
+        button8.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button8);
+            }
+        });
+        button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, button9);
+            }
+        });
 
         return rootView;
+    }
+
+    // Run this whenever a preference is changed
+    private void buttonToggled(boolean isChecked, ToggleButton button) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+        userReference.child(String.valueOf(button.getTextOn())).setValue(isChecked);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -152,16 +209,6 @@ public class ProfileFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

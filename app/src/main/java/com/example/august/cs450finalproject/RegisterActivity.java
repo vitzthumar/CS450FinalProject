@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +30,19 @@ public class RegisterActivity extends AppCompatActivity {
     private Button button_register;
     private Button button_login;
 
+    // toggle buttons
+    private ToggleButton button1;
+    private ToggleButton button2;
+    private ToggleButton button3;
+    private ToggleButton button4;
+    private ToggleButton button5;
+    private ToggleButton button6;
+    private ToggleButton button7;
+    private ToggleButton button8;
+    private ToggleButton button9;
+
+    private boolean[] preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,15 +50,27 @@ public class RegisterActivity extends AppCompatActivity {
 
         name = (EditText) findViewById(R.id.signup_name_input);
         email = (EditText) findViewById(R.id.signup_email_input);
-        password =(EditText) findViewById(R.id.signup_password_input);
-        button_register = (Button)findViewById(R.id.button_register);
-        button_login = (Button)findViewById(R.id.button_login);
+        password = (EditText) findViewById(R.id.signup_password_input);
+        button_register = (Button) findViewById(R.id.button_register);
+        button_login = (Button) findViewById(R.id.button_login);
         mAuth = FirebaseAuth.getInstance();
+
+        // preferences
+        preferences = new boolean[] {false, false, false, false, false, false, false, false, false};
+        button1 = findViewById(R.id.toggle_button1);
+        button2 = findViewById(R.id.toggle_button2);
+        button3 = findViewById(R.id.toggle_button3);
+        button4 = findViewById(R.id.toggle_button4);
+        button5 = findViewById(R.id.toggle_button5);
+        button6 = findViewById(R.id.toggle_button6);
+        button7 = findViewById(R.id.toggle_button7);
+        button8 = findViewById(R.id.toggle_button8);
+        button9 = findViewById(R.id.toggle_button9);
 
         button_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v == button_register){
+                if (v == button_register) {
                     RegisterUser();
                 }
             }
@@ -51,13 +78,66 @@ public class RegisterActivity extends AppCompatActivity {
         button_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v == button_login){
+                if (v == button_login) {
                     startActivity(new Intent(getApplicationContext(),
                             LoginActivity.class));
                 }
             }
         });
+
+        // toggle button click listeners
+        button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 1);
+            }
+        });
+        button2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 2);
+            }
+        });
+        button3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 3);
+            }
+        });
+        button4.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 4);
+            }
+        });
+        button5.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 5);
+            }
+        });
+        button6.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 6);
+            }
+        });
+        button7.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 7);
+            }
+        });
+        button8.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 8);
+            }
+        });
+        button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonToggled(isChecked, 9);
+            }
+        });
     }
+
+    // Run this whenever a preference is changed
+    private void buttonToggled(boolean isChecked, int buttonNumber) {
+        preferences[buttonNumber - 1] = isChecked;
+    }
+
 
     public void RegisterUser(){
         final String Name = name.getText().toString().trim();
@@ -97,6 +177,19 @@ public class RegisterActivity extends AppCompatActivity {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(RegisterActivity.this, "registration successful",
                                                     Toast.LENGTH_SHORT).show();
+
+                                                    // add the user's preferences
+                                                    DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                                    userReference.child(getResources().getString(R.string.preference1)).setValue(preferences[0]);
+                                                    userReference.child(getResources().getString(R.string.preference2)).setValue(preferences[1]);
+                                                    userReference.child(getResources().getString(R.string.preference3)).setValue(preferences[2]);
+                                                    userReference.child(getResources().getString(R.string.preference4)).setValue(preferences[3]);
+                                                    userReference.child(getResources().getString(R.string.preference5)).setValue(preferences[4]);
+                                                    userReference.child(getResources().getString(R.string.preference6)).setValue(preferences[5]);
+                                                    userReference.child(getResources().getString(R.string.preference7)).setValue(preferences[6]);
+                                                    userReference.child(getResources().getString(R.string.preference8)).setValue(preferences[7]);
+                                                    userReference.child(getResources().getString(R.string.preference9)).setValue(preferences[8]);
+
                                             finish();
                                             startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
                                         } else {

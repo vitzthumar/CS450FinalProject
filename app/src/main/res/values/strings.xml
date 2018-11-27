@@ -12,6 +12,16 @@
     <string name="title_notifications">Notifications</string>
     <string name="profile">Profile</string>
 
+    <string name="preference1">Sports</string>
+    <string name="preference2">Cooking</string>
+    <string name="preference3">Movies and TV</string>
+    <string name="preference4">Board Games</string>
+    <string name="preference5">Video Games</string>
+    <string name="preference6">Art</string>
+    <string name="preference7">Hiking and Camping</string>
+    <string name="preference8">Music</string>
+    <string name="preference9">Politics</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
