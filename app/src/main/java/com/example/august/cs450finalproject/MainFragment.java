@@ -89,37 +89,6 @@ public class MainFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
-        /*
-        // initialize the views
-        enterUserEmail = rootView.findViewById(R.id.sendRequestEditText);
-        sendFriendRequest = rootView.findViewById(R.id.sendRequestButton);
-        sendFriendRequest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-
-                // TODO: FIX THE FRIEND REQUEST
-
-
-                Thread friendRequestThread = new Thread() {
-                    @Override
-                    public void run() {
-                        // send the the user whose email is in the text field a friend request
-                        String userEmail = enterUserEmail.getText().toString();
-                        if (!userEmail.equals("")) {
-                            // disable the friend request button
-                            sendFriendRequest.setEnabled(false);
-                            // find the ID given the email
-                            findUserIDFromEmail(userEmail);
-                        }
-                    }
-                };
-                friendRequestThread.start();
-            }
-        });
-        */
-
         getInitialLocation();
 
         return rootView;

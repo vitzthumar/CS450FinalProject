@@ -175,20 +175,22 @@ public class RegisterActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
-                                            Toast.makeText(RegisterActivity.this, "registration successful",
-                                                    Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(RegisterActivity.this, "registration successful", Toast.LENGTH_SHORT).show();
 
-                                                    // add the user's preferences
-                                                    DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                                    userReference.child(getResources().getString(R.string.preference1)).setValue(preferences[0]);
-                                                    userReference.child(getResources().getString(R.string.preference2)).setValue(preferences[1]);
-                                                    userReference.child(getResources().getString(R.string.preference3)).setValue(preferences[2]);
-                                                    userReference.child(getResources().getString(R.string.preference4)).setValue(preferences[3]);
-                                                    userReference.child(getResources().getString(R.string.preference5)).setValue(preferences[4]);
-                                                    userReference.child(getResources().getString(R.string.preference6)).setValue(preferences[5]);
-                                                    userReference.child(getResources().getString(R.string.preference7)).setValue(preferences[6]);
-                                                    userReference.child(getResources().getString(R.string.preference8)).setValue(preferences[7]);
-                                                    userReference.child(getResources().getString(R.string.preference9)).setValue(preferences[8]);
+                                            // add the user's preferences
+                                            DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                            userReference.child(getResources().getString(R.string.preference1)).setValue(preferences[0]);
+                                            userReference.child(getResources().getString(R.string.preference2)).setValue(preferences[1]);
+                                            userReference.child(getResources().getString(R.string.preference3)).setValue(preferences[2]);
+                                            userReference.child(getResources().getString(R.string.preference4)).setValue(preferences[3]);
+                                            userReference.child(getResources().getString(R.string.preference5)).setValue(preferences[4]);
+                                            userReference.child(getResources().getString(R.string.preference6)).setValue(preferences[5]);
+                                            userReference.child(getResources().getString(R.string.preference7)).setValue(preferences[6]);
+                                            userReference.child(getResources().getString(R.string.preference8)).setValue(preferences[7]);
+                                            userReference.child(getResources().getString(R.string.preference9)).setValue(preferences[8]);
+
+                                            // set the user's default radius to 50 km
+                                            userReference.child("radius").setValue(50);
 
                                             finish();
                                             startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));

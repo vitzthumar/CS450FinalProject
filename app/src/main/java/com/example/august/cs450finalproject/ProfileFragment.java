@@ -4,17 +4,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,6 +30,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class ProfileFragment extends Fragment {
+
+    private final static String LOGTAG = ProfileFragment.class.getSimpleName();
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -29,6 +39,11 @@ public class ProfileFragment extends Fragment {
     private TextView Email;
     private TextView Uid;
     private Button logout;
+    private Button deleteAccount;
+
+    // radius views
+    private TextView radiusTextView;
+    private SeekBar radiusSeekBar;
 
     // toggle buttons
     private ToggleButton button1;
@@ -47,7 +62,6 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,11 +74,12 @@ public class ProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         // Auth stuff
-        Name = (TextView)rootView.findViewById(R.id.profileName);
-        Email = (TextView)rootView.findViewById(R.id.profileEmail);
-        Uid = (TextView)rootView.findViewById(R.id.profileUid);
+        Name = rootView.findViewById(R.id.profileName);
+        Email = rootView.findViewById(R.id.profileEmail);
+        Uid = rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
-        logout = (Button)rootView.findViewById(R.id.button_logout);
+        logout = rootView.findViewById(R.id.button_logout);
+        deleteAccount = rootView.findViewById(R.id.button_delete_account);
         user = mAuth.getCurrentUser();
 
         // is there a current user?
@@ -87,7 +102,7 @@ public class ProfileFragment extends Fragment {
             Email.setText(email);
             Uid.setText(uid);
         }
-
+        // logout and delete account on click listeners
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,6 +113,18 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: fix this
+            }
+        });
+        // radius and seekbar
+        radiusTextView = rootView.findViewById(R.id.radius_text_view);
+        radiusSeekBar = rootView.findViewById(R.id.radius_seek_bar);
+        radiusSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        radiusTextView.setText("Radius: " + radiusSeekBar.getProgress() + " kilometers");
+
         // preferences
         button1 = rootView.findViewById(R.id.toggle_button1);
         button2 = rootView.findViewById(R.id.toggle_button2);
@@ -127,8 +154,6 @@ public class ProfileFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
-
         // toggle button click listeners
         button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -178,6 +203,26 @@ public class ProfileFragment extends Fragment {
 
         return rootView;
     }
+
+    SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int currentRadius, boolean b) {
+            // update the radius text view continuously as the user adjusts the SeekBar
+            radiusTextView.setText("Radius: " + currentRadius + " kilometers");
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // called when the user first touches the SeekBar, so do nothing
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // the user has has finished moving the SeekBar, update their radius in Firebase
+            DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+            userReference.child("radius").setValue(seekBar.getProgress());
+        }
+    };
 
     // Run this whenever a preference is changed
     private void buttonToggled(boolean isChecked, ToggleButton button) {
