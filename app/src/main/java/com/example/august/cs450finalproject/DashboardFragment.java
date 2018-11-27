@@ -59,6 +59,9 @@ public class DashboardFragment extends Fragment {
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
 
+    private RecyclerView recyclerView2;
+    private SimpleRVAdapter adapter2;
+
     private OnFragmentInteractionListener mListener;
 
     private GeoLocation USERS_CURRENT_LOCATION;
@@ -110,11 +113,20 @@ public class DashboardFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
+        // Recycler View 1
         recyclerView = rootView.findViewById(R.id.dashboard_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Setup adapters here
         recyclerView.setAdapter(adapter);
+
+
+//        // Recycler View 2
+//        recyclerView2 = rootView.findViewById(R.id.dashboard_recyclerView2);
+//        recyclerView2.setLayoutManager(new LinearLayoutManager(getContext()));
+//
+//        // Setup adapters here
+//        recyclerView.setAdapter(adapter2);
 
         //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 
@@ -130,6 +142,7 @@ public class DashboardFragment extends Fragment {
     private void fetchUsers (int radius) {
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
+        geofire = new GeoFire(database.child("Locations"));
         GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);
         System.out.println("QUERRYING ON " + USERS_CURRENT_LOCATION.latitude + ", " + USERS_CURRENT_LOCATION.longitude);
 
@@ -252,7 +265,6 @@ public class DashboardFragment extends Fragment {
 
     private void setupFirebase() {
         database = FirebaseDatabase.getInstance().getReference();
-        geofire = new GeoFire(database.child("Locations"));
         setupListeners();
     }
 
