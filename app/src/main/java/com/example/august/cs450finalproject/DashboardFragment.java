@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -12,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -457,7 +459,16 @@ public class DashboardFragment extends Fragment {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
-                                    }
+
+                                        // get the information about each user's location and pin them on the map
+                                        Intent intent = new Intent(getContext(), MapsActivity.class);
+                                        intent.putExtra("OTHER_LAT", String.valueOf(u.lat));
+                                        intent.putExtra("OTHER_LON", String.valueOf(u.lng));
+                                        intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
+                                        intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
+                                        intent.putExtra("OTHER_NAME", u.name);
+                                        startActivity(intent);
+                                        }
                                 });
 
                         AlertDialog alert11 = builder1.create();
