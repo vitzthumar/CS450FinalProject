@@ -25,7 +25,7 @@
             android:layout_height="0dp"
             android:layout_weight=".5"
             android:id="@+id/pendingET"
-            android:text="yvurL1qwSaVKIJOL6odyyTzyzKi2"/>
+            android:text="9BGqbV7sAGMgg4XI59qQ9EkjCw93"/>
 
         <Button
             android:layout_width="match_parent"

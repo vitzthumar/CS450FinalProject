@@ -145,8 +145,11 @@ public class NotificationFragment extends Fragment {
         pendingBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
-                friendsReference.child(pendingET.getText().toString()).setValue("pending");
+                DatabaseReference friendsReference = database.child("Friends").child(pendingET.getText().toString());
+                friendsReference.child(user.getUid()).setValue("pending");
+
+//                DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
+//                friendsReference.child(pendingET.getText().toString()).setValue("pending");
             }
         });
         return rootView;

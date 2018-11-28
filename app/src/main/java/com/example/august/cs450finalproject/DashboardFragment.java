@@ -72,7 +72,6 @@ public class DashboardFragment extends Fragment {
     private LocationHandler handler = null;
 
     private final static String FRIEND = "friends";
-    private boolean friendsLoaded;
     private HashSet<String> usersFriends = new HashSet<>();
 
     public DashboardFragment() {
@@ -82,7 +81,6 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.friendsLoaded = false;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         adapter = new SimpleRVAdapter(this.users);

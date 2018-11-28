@@ -59,7 +59,10 @@ public class MainFragment extends Fragment {
     private LocationHandler handler = null;
 
     // Firebase instance
-    FirebaseDatabase database = null;
+    DatabaseReference database;
+    private final static String FRIEND = "friends";
+    private HashSet<String> usersFriends = new HashSet<>();
+    private HashSet<String> friendsOfFriends = new HashSet<>();
 
     // Required empty constructor
     public MainFragment() {
@@ -71,20 +74,35 @@ public class MainFragment extends Fragment {
         setRetainInstance(true);
 
         // set the Firebase instance
-        this.database = FirebaseDatabase.getInstance();
-    }
-
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
+        this.database = FirebaseDatabase.getInstance().getReference();
         // Auth stuff
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getValue().equals(FRIEND)) {
+                        System.out.println(snapshot.getKey() + " is a friend");
+                        usersFriends.add(snapshot.getKey());
+                    }
+                }
+                // After loading the friends. Get the location, and fetch all friends in the area
+                getFriendsOfFriends();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         getInitialLocation();
 
@@ -122,7 +140,7 @@ public class MainFragment extends Fragment {
 
     // Update user's current location in Firebase
     private void updateUserLocation(Location userLocation) {
-        DatabaseReference locationReference = this.database.getReference("Locations");
+        DatabaseReference locationReference = this.database.child("Locations");
         GeoFire geoFire = new GeoFire(locationReference);
 
         // Set Location
@@ -159,5 +177,26 @@ public class MainFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void getFriendsOfFriends () {
+        for (String friendsId : usersFriends) {
+            this.database.child("Friends").child(friendsId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        if (!(snapshot.getKey().equals(user.getUid())) && !(usersFriends.contains(snapshot.getKey()))) {
+                            System.out.println(snapshot.getKey() + " is a friend of friend");
+                            friendsOfFriends.add(snapshot.getKey());
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 }
