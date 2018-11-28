@@ -52,7 +52,6 @@ public class User {
         this.uuid = null;
         this.lat = null;
         this.lng = null;
-
     }
 
     public String getName() {

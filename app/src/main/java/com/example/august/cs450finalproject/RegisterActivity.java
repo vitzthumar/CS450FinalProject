@@ -190,6 +190,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                                             // set the user's default radius to 50 km
                                             userReference.child("radius").setValue(50);
+                                            // set the user's default location view to false
+                                            userReference.child("display_location").setValue(false);
 
                                             finish();
                                             startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));

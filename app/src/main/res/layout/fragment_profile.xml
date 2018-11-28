@@ -36,13 +36,6 @@
             android:layout_height="wrap_content"
             android:text="Email"
             android:id="@+id/profileEmail"/>
-        <TextView
-            android:padding="10dp"
-            android:layout_margin="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="User ID"
-            android:id="@+id/profileUid"/>
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -65,29 +58,13 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <ToggleButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/button_logout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Logout"
-                android:layout_gravity="center"/>
-
-            <Button
-                android:id="@+id/button_delete_account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete Account"
-                android:layout_gravity="center"/>
-
-        </LinearLayout>
-
-
+            android:id="@+id/display_location"
+            android:textOn="DISPLAY LOCATION"
+            android:textOff="DISPLAY LOCATION"
+            />
 
         <GridLayout
             android:layout_width="wrap_content"
@@ -145,6 +122,28 @@
                 />
 
         </GridLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/button_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:layout_gravity="center"/>
+
+            <Button
+                android:id="@+id/button_delete_account"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete Account"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -47,7 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng userLocation = new LatLng(userLat, userLon);
         LatLng otherLocation = new LatLng(otherLat, otherLon);
 
-        mMap.addMarker(new MarkerOptions().position(userLocation).title("Your location"));
+        mMap.addMarker(new MarkerOptions().position(userLocation).title("My location"));
         mMap.addMarker(new MarkerOptions().position(otherLocation).title(otherName + "'s location"));
 
         // position and zoom the camera to capture both points

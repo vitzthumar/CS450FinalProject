@@ -37,9 +37,9 @@ public class ProfileFragment extends Fragment {
     private FirebaseUser user;
     private TextView Name;
     private TextView Email;
-    private TextView Uid;
     private Button logout;
     private Button deleteAccount;
+    private ToggleButton displayLocation;
 
     // radius views
     private TextView radiusTextView;
@@ -76,7 +76,6 @@ public class ProfileFragment extends Fragment {
         // Auth stuff
         Name = rootView.findViewById(R.id.profileName);
         Email = rootView.findViewById(R.id.profileEmail);
-        Uid = rootView.findViewById(R.id.profileUid);
         mAuth = FirebaseAuth.getInstance();
         logout = rootView.findViewById(R.id.button_logout);
         deleteAccount = rootView.findViewById(R.id.button_delete_account);
@@ -100,7 +99,6 @@ public class ProfileFragment extends Fragment {
                 }
             });
             Email.setText(email);
-            Uid.setText(uid);
         }
         // logout and delete account on click listeners
         logout.setOnClickListener(new View.OnClickListener() {
@@ -119,11 +117,20 @@ public class ProfileFragment extends Fragment {
                 // TODO: fix this
             }
         });
-        // radius and seekbar
+        // display location
+        displayLocation = rootView.findViewById(R.id.display_location);
+        displayLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                userReference.child("display_location").setValue(isChecked);
+
+            }
+        });
+
+        // radius and SeekBar
         radiusTextView = rootView.findViewById(R.id.radius_text_view);
         radiusSeekBar = rootView.findViewById(R.id.radius_seek_bar);
         radiusSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        radiusTextView.setText("Radius: " + radiusSeekBar.getProgress() + " kilometers");
 
         // preferences
         button1 = rootView.findViewById(R.id.toggle_button1);
@@ -149,6 +156,14 @@ public class ProfileFragment extends Fragment {
                 button7.setChecked(dataSnapshot.child(getResources().getString(R.string.preference7)).getValue(Boolean.class));
                 button8.setChecked(dataSnapshot.child(getResources().getString(R.string.preference8)).getValue(Boolean.class));
                 button9.setChecked(dataSnapshot.child(getResources().getString(R.string.preference9)).getValue(Boolean.class));
+
+                // set the radius and SeekBar
+                int progress = dataSnapshot.child("radius").getValue(Integer.class);
+                radiusSeekBar.setProgress(progress);
+                radiusTextView.setText("Radius: " + progress + " kilometers");
+
+                // also set the display location
+                displayLocation.setChecked(dataSnapshot.child("display_location").getValue(Boolean.class));
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {

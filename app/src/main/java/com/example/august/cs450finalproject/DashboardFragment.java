@@ -438,41 +438,55 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         User u = dataSource.get(getAdapterPosition());
-                        AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
-                        builder1.setMessage(
-                                "Name: " + u.getName() + "\n" +
-                                "Email: " + u.getEmail() + "\n" +
-                                "Distance to you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
-                        );
-                        builder1.setCancelable(true);
 
-                        builder1.setPositiveButton(
-                                "Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
+                        // only set the map button if the other user wants their location to be displayed
+                        database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        builder1.setNegativeButton(
-                                "See on Map",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
+                                AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
+                                builder1.setMessage(
+                                        "Name: " + u.getName() + "\n" +
+                                                "Email: " + u.getEmail() + "\n" +
+                                                "Distance to you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
+                                );
+                                builder1.setCancelable(true);
 
-                                        // get the information about each user's location and pin them on the map
-                                        Intent intent = new Intent(getContext(), MapsActivity.class);
-                                        intent.putExtra("OTHER_LAT", String.valueOf(u.lat));
-                                        intent.putExtra("OTHER_LON", String.valueOf(u.lng));
-                                        intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
-                                        intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
-                                        intent.putExtra("OTHER_NAME", u.name);
-                                        startActivity(intent);
-                                        }
-                                });
+                                builder1.setPositiveButton(
+                                        "Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
 
-                        AlertDialog alert11 = builder1.create();
-                        alert11.show();
+                                if (dataSnapshot.child("display_location").getValue(Boolean.class)) {
+                                    builder1.setNegativeButton(
+                                            "See on Map",
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    dialog.cancel();
+
+                                                    // get the information about each user's location and pin them on the map
+                                                    Intent intent = new Intent(getContext(), MapsActivity.class);
+                                                    intent.putExtra("OTHER_LAT", String.valueOf(u.lat));
+                                                    intent.putExtra("OTHER_LON", String.valueOf(u.lng));
+                                                    intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
+                                                    intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
+                                                    intent.putExtra("OTHER_NAME", u.name);
+                                                    startActivity(intent);
+                                                }
+                                            });
+                                }
+                                AlertDialog alert11 = builder1.create();
+                                alert11.show();
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
+
+
                     }
                 });
             }
