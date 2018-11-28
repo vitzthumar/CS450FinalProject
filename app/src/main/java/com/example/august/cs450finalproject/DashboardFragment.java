@@ -61,9 +61,6 @@ public class DashboardFragment extends Fragment {
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
 
-    private RecyclerView recyclerView2;
-    private SimpleRVAdapter adapter2;
-
     private OnFragmentInteractionListener mListener;
 
     private GeoLocation USERS_CURRENT_LOCATION;
@@ -119,14 +116,6 @@ public class DashboardFragment extends Fragment {
 
         // Setup adapters here
         recyclerView.setAdapter(adapter);
-
-
-//        // Recycler View 2
-//        recyclerView2 = rootView.findViewById(R.id.dashboard_recyclerView2);
-//        recyclerView2.setLayoutManager(new LinearLayoutManager(getContext()));
-//
-//        // Setup adapters here
-//        recyclerView.setAdapter(adapter2);
 
         //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
 

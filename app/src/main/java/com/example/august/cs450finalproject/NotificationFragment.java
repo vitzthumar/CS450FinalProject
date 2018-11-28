@@ -284,7 +284,7 @@ public class NotificationFragment extends Fragment {
         // access this user from the database and get specific components
         DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
 
-        if (relationship == "declined") {
+        if (relationship.equals("declined")) {
             // if declined, remove the user from the Friends list
             friendsReference.child(userID).removeValue();
         } else {
