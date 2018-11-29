@@ -144,11 +144,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     public void RegisterUser(){
-        final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this,
-                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Registering...");
-        progressDialog.show();
+
         final String Name = name.getText().toString().trim();
         final String Email = email.getText().toString().trim();
         String Password = password.getText().toString().trim();
@@ -164,6 +160,11 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
             return;
         }
+        final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this,
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Registering...");
+        progressDialog.show();
         mAuth.createUserWithEmailAndPassword(Email, Password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
