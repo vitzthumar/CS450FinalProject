@@ -2,6 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -109,7 +110,6 @@ public class MainFragment extends Fragment {
                     }
                 }
                 getFriendsOfFriends();
-                getInitialLocation();
             }
 
             @Override
@@ -138,23 +138,21 @@ public class MainFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        if (!(snapshot.getKey().equals(user.getUid())) && !(usersFriends.contains(snapshot.getKey()))) {
+                        if (!(snapshot.getKey().equals(user.getUid())) && !(usersFriends.contains(snapshot.getKey())) && !(friendsOfFriends.contains(snapshot.getKey()))) {
                             System.out.println(snapshot.getKey() + " is a friend of friend");
                             friendsOfFriends.add(snapshot.getKey());
                         }
                     }
-                    // After we load all the friends of friends, show them on the DB
-                    fetchUsers(100);
                 }
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
                 }
             });
         }
+        getInitialLocation();
     }
 
     private void getInitialLocation() {
-
         Thread locationThread = new Thread() {
             @Override
             public void run() {
@@ -198,6 +196,7 @@ public class MainFragment extends Fragment {
                     System.err.println("There was an error saving the location to GeoFire: " + error);
                 } else {
                     System.out.println("Location saved on server successfully!");
+                    fetchUsers(100);
                 }
             }
         });
