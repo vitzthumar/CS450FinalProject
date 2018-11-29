@@ -10,9 +10,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
@@ -56,11 +59,34 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                             startActivity(new Intent(getApplicationContext(),
                                     BottomNavigationActivity.class));
-                        }else {
-                            Toast.makeText(LoginActivity.this, "couldn't login",
-                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    Toast.makeText(LoginActivity.this, "Invalid Password",
+                            Toast.LENGTH_SHORT).show();
+                } else if (e instanceof FirebaseAuthInvalidUserException) {
+
+                    String errorCode =
+                            ((FirebaseAuthInvalidUserException) e).getErrorCode();
+
+                    if (errorCode.equals("ERROR_USER_NOT_FOUND")) {
+                        Toast.makeText(LoginActivity.this, "No matching account found",
+                                Toast.LENGTH_SHORT).show();
+                    } else if (errorCode.equals("ERROR_USER_DISABLED")) {
+                        Toast.makeText(LoginActivity.this, "User account has been disabled",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }

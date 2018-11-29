@@ -14,12 +14,16 @@ import android.widget.ToggleButton;
 
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnFailureListener;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -158,57 +162,76 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        try {
-                            //check if successful
-                            if (task.isSuccessful()) {
-                                //User is successfully registered and logged in
-                                //start Profile Activity here
-                                // create the new user that will be added from the supplied parameters
-                                User newUser = new User(
-                                        Name,
-                                        Email);
+                        //check if successful
+                        if (task.isSuccessful()) {
+                            //User is successfully registered and logged in
+                            //start Profile Activity here
+                            // create the new user that will be added from the supplied parameters
+                            User newUser = new User(
+                                    Name,
+                                    Email);
 
-                                DatabaseReference db = FirebaseDatabase.getInstance().getReference("Users");
-                                // set the value in the database under the unique ID
-                                db.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(newUser).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(RegisterActivity.this, "registration successful", Toast.LENGTH_SHORT).show();
+                            DatabaseReference db = FirebaseDatabase.getInstance().getReference("Users");
+                            // set the value in the database under the unique ID
+                            db.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(newUser).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(RegisterActivity.this, "registration successful", Toast.LENGTH_SHORT).show();
 
-                                            // add the user's preferences
-                                            DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                            userReference.child("interests").child(getResources().getString(R.string.interests1)).setValue(interests[0]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests2)).setValue(interests[1]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests3)).setValue(interests[2]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests4)).setValue(interests[3]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests5)).setValue(interests[4]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests6)).setValue(interests[5]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests7)).setValue(interests[6]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests8)).setValue(interests[7]);
-                                            userReference.child("interests").child(getResources().getString(R.string.interests9)).setValue(interests[8]);
+                                        // add the user's preferences
+                                        DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                        userReference.child("interests").child(getResources().getString(R.string.interests1)).setValue(interests[0]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests2)).setValue(interests[1]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests3)).setValue(interests[2]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests4)).setValue(interests[3]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests5)).setValue(interests[4]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests6)).setValue(interests[5]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests7)).setValue(interests[6]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests8)).setValue(interests[7]);
+                                        userReference.child("interests").child(getResources().getString(R.string.interests9)).setValue(interests[8]);
 
-                                            // set the user's default radius to 50 km
-                                            userReference.child("radius").setValue(50);
-                                            // set the user's default location view to false
-                                            userReference.child("display_location").setValue(false);
+                                        // set the user's default radius to 50 km
+                                        userReference.child("radius").setValue(50);
+                                        // set the user's default location view to false
+                                        userReference.child("display_location").setValue(false);
 
-                                            finish();
-                                            startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
-                                        } else {
-                                            Toast.makeText(RegisterActivity.this, "Could not create user",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
+                                        finish();
+                                        startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
+                                    } else {
+                                        Toast.makeText(RegisterActivity.this, "Could not create user",
+                                                Toast.LENGTH_SHORT).show();
                                     }
-                                });
-                            }else{
-                                Toast.makeText(RegisterActivity.this, "Couldn't register, try again",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }catch (Exception e){
-                            e.printStackTrace();
+                                }
+                            });
                         }
                     }
-                });
+                }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    Toast.makeText(RegisterActivity.this, "Invalid Password",
+                            Toast.LENGTH_SHORT).show();
+                } else if (e instanceof FirebaseAuthInvalidUserException) {
+
+                    String errorCode =
+                            ((FirebaseAuthInvalidUserException) e).getErrorCode();
+
+                    if (errorCode.equals("ERROR_USER_NOT_FOUND")) {
+                        Toast.makeText(RegisterActivity.this, "No matching account found",
+                                Toast.LENGTH_SHORT).show();
+                    } else if (errorCode.equals("ERROR_USER_DISABLED")) {
+                        Toast.makeText(RegisterActivity.this, "User account has been disabled",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }
