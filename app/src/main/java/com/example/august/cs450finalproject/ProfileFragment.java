@@ -147,15 +147,15 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // set the buttons to the checked values in Firebase
-                button1.setChecked(dataSnapshot.child(getResources().getString(R.string.preference1)).getValue(Boolean.class));
-                button2.setChecked(dataSnapshot.child(getResources().getString(R.string.preference2)).getValue(Boolean.class));
-                button3.setChecked(dataSnapshot.child(getResources().getString(R.string.preference3)).getValue(Boolean.class));
-                button4.setChecked(dataSnapshot.child(getResources().getString(R.string.preference4)).getValue(Boolean.class));
-                button5.setChecked(dataSnapshot.child(getResources().getString(R.string.preference5)).getValue(Boolean.class));
-                button6.setChecked(dataSnapshot.child(getResources().getString(R.string.preference6)).getValue(Boolean.class));
-                button7.setChecked(dataSnapshot.child(getResources().getString(R.string.preference7)).getValue(Boolean.class));
-                button8.setChecked(dataSnapshot.child(getResources().getString(R.string.preference8)).getValue(Boolean.class));
-                button9.setChecked(dataSnapshot.child(getResources().getString(R.string.preference9)).getValue(Boolean.class));
+                button1.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests1)).getValue(Boolean.class));
+                button2.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests2)).getValue(Boolean.class));
+                button3.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests3)).getValue(Boolean.class));
+                button4.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests4)).getValue(Boolean.class));
+                button5.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests5)).getValue(Boolean.class));
+                button6.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests6)).getValue(Boolean.class));
+                button7.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests7)).getValue(Boolean.class));
+                button8.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests8)).getValue(Boolean.class));
+                button9.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests9)).getValue(Boolean.class));
 
                 // set the radius and SeekBar
                 int progress = dataSnapshot.child("radius").getValue(Integer.class);
@@ -242,7 +242,7 @@ public class ProfileFragment extends Fragment {
     // Run this whenever a preference is changed
     private void buttonToggled(boolean isChecked, ToggleButton button) {
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-        userReference.child(String.valueOf(button.getTextOn())).setValue(isChecked);
+        userReference.child("interests").child(String.valueOf(button.getTextOn())).setValue(isChecked);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

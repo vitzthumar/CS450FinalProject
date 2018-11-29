@@ -25,7 +25,8 @@
             android:layout_height="0dp"
             android:layout_weight=".5"
             android:id="@+id/pendingET"
-            android:text="9BGqbV7sAGMgg4XI59qQ9EkjCw93"/>
+            android:inputType="textEmailAddress"
+            android:hint="Send friend request via email..."/>
 
         <Button
             android:layout_width="match_parent"
