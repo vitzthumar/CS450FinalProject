@@ -14,7 +14,7 @@
         <meta-data android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyA0zbfXH5esDTEoHxf6e9FyXSy40-8x6dk" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".RegisterActivity">
+        <activity android:name=".LoginActivity">
 
             <!-- Keep this intent filter here. It's what determines what the default load screen is when the app starts -->
             <intent-filter>
@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
         <activity
             android:name=".BottomNavigationActivity"
             android:label="@string/title_activity_bottom_navigation"></activity>

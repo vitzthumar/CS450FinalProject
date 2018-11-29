@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -26,6 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 
+import org.w3c.dom.Text;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -33,18 +37,10 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText password;
     private EditText email;
     private Button button_register;
-    private Button button_login;
+    private TextView link_login;
 
     // toggle buttons
-    private ToggleButton button1;
-    private ToggleButton button2;
-    private ToggleButton button3;
-    private ToggleButton button4;
-    private ToggleButton button5;
-    private ToggleButton button6;
-    private ToggleButton button7;
-    private ToggleButton button8;
-    private ToggleButton button9;
+    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
 
     private boolean[] interests;
 
@@ -57,7 +53,7 @@ public class RegisterActivity extends AppCompatActivity {
         email = (EditText) findViewById(R.id.signup_email_input);
         password = (EditText) findViewById(R.id.signup_password_input);
         button_register = (Button) findViewById(R.id.button_register);
-        button_login = (Button) findViewById(R.id.button_login);
+        link_login = (TextView) findViewById(R.id.link_login);
         mAuth = FirebaseAuth.getInstance();
 
         // preferences
@@ -80,12 +76,10 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
-        button_login.setOnClickListener(new View.OnClickListener() {
+        link_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v == button_login) {
-                    startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                }
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
             }
         });
 
@@ -95,6 +89,16 @@ public class RegisterActivity extends AppCompatActivity {
                 buttonToggled(isChecked, 1);
             }
         });
+
+        // Click lister way
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buttonToggled(((CheckBox) view).isChecked(), 1);
+            }
+        });
+
+        // checkchange listener way
         button2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 buttonToggled(isChecked, 2);
@@ -171,8 +175,6 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         //check if successful
                         if (task.isSuccessful()) {
-                            // Dismiss the progress dialog
-                            progressDialog.dismiss();
                             //User is successfully registered and logged in
                             //start Profile Activity here
                             // create the new user that will be added from the supplied parameters
@@ -186,8 +188,6 @@ public class RegisterActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        Toast.makeText(RegisterActivity.this, "registration successful", Toast.LENGTH_SHORT).show();
-
                                         // add the user's preferences
                                         DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                         userReference.child("interests").child(getResources().getString(R.string.interests1)).setValue(interests[0]);
@@ -204,7 +204,10 @@ public class RegisterActivity extends AppCompatActivity {
                                         userReference.child("radius").setValue(50);
                                         // set the user's default location view to false
                                         userReference.child("display_location").setValue(false);
-
+                                        // Dismiss the progress dialog
+                                        progressDialog.dismiss();
+                                        // Show Message
+                                        Toast.makeText(RegisterActivity.this, "registration successful", Toast.LENGTH_SHORT).show();
                                         finish();
                                         startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
                                     }
