@@ -1,5 +1,6 @@
 package com.example.august.cs450finalproject;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -48,6 +49,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void LoginUser(){
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
         String Email = email.getText().toString().trim();
         String Password = password.getText().toString().trim();
         mAuth.signInWithEmailAndPassword(Email, Password)
@@ -55,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()){
+                            progressDialog.dismiss();
                             currentUser = mAuth.getCurrentUser();
                             finish();
                             startActivity(new Intent(getApplicationContext(),
@@ -64,6 +71,7 @@ public class LoginActivity extends AppCompatActivity {
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
                 Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
                         Toast.LENGTH_LONG).show();
             }

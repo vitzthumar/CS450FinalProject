@@ -1,5 +1,6 @@
 package com.example.august.cs450finalproject;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -143,6 +144,11 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     public void RegisterUser(){
+        final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this,
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Registering...");
+        progressDialog.show();
         final String Name = name.getText().toString().trim();
         final String Email = email.getText().toString().trim();
         String Password = password.getText().toString().trim();
@@ -164,6 +170,8 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         //check if successful
                         if (task.isSuccessful()) {
+                            // Dismiss the progress dialog
+                            progressDialog.dismiss();
                             //User is successfully registered and logged in
                             //start Profile Activity here
                             // create the new user that will be added from the supplied parameters
@@ -206,6 +214,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }).addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
                 Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
                         Toast.LENGTH_LONG).show();
             }
