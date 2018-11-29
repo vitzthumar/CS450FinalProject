@@ -198,9 +198,6 @@ public class RegisterActivity extends AppCompatActivity {
 
                                         finish();
                                         startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
-                                    } else {
-                                        Toast.makeText(RegisterActivity.this, "Could not create user",
-                                                Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -209,28 +206,8 @@ public class RegisterActivity extends AppCompatActivity {
                 }).addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    Toast.makeText(RegisterActivity.this, "Invalid Password",
-                            Toast.LENGTH_SHORT).show();
-                } else if (e instanceof FirebaseAuthInvalidUserException) {
-
-                    String errorCode =
-                            ((FirebaseAuthInvalidUserException) e).getErrorCode();
-
-                    if (errorCode.equals("ERROR_USER_NOT_FOUND")) {
-                        Toast.makeText(RegisterActivity.this, "No matching account found",
-                                Toast.LENGTH_SHORT).show();
-                    } else if (errorCode.equals("ERROR_USER_DISABLED")) {
-                        Toast.makeText(RegisterActivity.this, "User account has been disabled",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
+                Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }

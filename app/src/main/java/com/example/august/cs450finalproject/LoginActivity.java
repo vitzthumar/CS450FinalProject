@@ -64,28 +64,8 @@ public class LoginActivity extends AppCompatActivity {
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    Toast.makeText(LoginActivity.this, "Invalid Password",
-                            Toast.LENGTH_SHORT).show();
-                } else if (e instanceof FirebaseAuthInvalidUserException) {
-
-                    String errorCode =
-                            ((FirebaseAuthInvalidUserException) e).getErrorCode();
-
-                    if (errorCode.equals("ERROR_USER_NOT_FOUND")) {
-                        Toast.makeText(LoginActivity.this, "No matching account found",
-                                Toast.LENGTH_SHORT).show();
-                    } else if (errorCode.equals("ERROR_USER_DISABLED")) {
-                        Toast.makeText(LoginActivity.this, "User account has been disabled",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
+                Toast.makeText(LoginActivity.this, e.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }
