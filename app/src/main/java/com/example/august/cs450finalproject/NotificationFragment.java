@@ -145,8 +145,8 @@ public class NotificationFragment extends Fragment {
         pendingBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
-                friendsReference.child(pendingET.getText().toString()).setValue("pending");
+                // send a friend request by passing an email
+                findUserIDFromEmail(pendingET.getText().toString());
             }
         });
         return rootView;
@@ -304,44 +304,55 @@ public class NotificationFragment extends Fragment {
         }
     }
 
-    /*
+
     // Find a user's ID given their email
     private void findUserIDFromEmail(String userEmail) {
-
-        DatabaseReference usersReference = database.getReference().child("Users");
+        DatabaseReference usersReference = database.child("Users");
         usersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
                     // check this child to see if its email matches the passed email
-                    if (currentSnapshot.child("Email").hasChild(userEmail)) {
+                    if (currentSnapshot.child("email").getValue(String.class).equals(userEmail)) {
                         // send this user a request given their ID
-                        sendFriendRequest(currentSnapshot.getKey());
+                        sendFriendRequest(currentSnapshot.getKey(), userEmail);
                         break;
                     }
                 }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // re-enable the friend request button
-                sendFriendRequest.setEnabled(true);
             }
         });
     }
 
     // Send a friend request given a user's ID
-    private void sendFriendRequest(String userID) {
-        DatabaseReference friendsReference = database.getReference().child("Friends").child(user.getUid());
-        friendsReference.child(userID).setValue("pending");
+    public void sendFriendRequest(String userID, String userEmail) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // re-enable the friend request button
+                DatabaseReference friendsReference = database.child("Friends").child(userID);
+                friendsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        boolean hasFriend = false;
+                        for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                            if (currentSnapshot.getKey().equals(user.getUid())) {
+                                hasFriend = true;
+                            }
+                        }
+                        // check if the other user is already friends with this user
+                        if (!hasFriend && !userEmail.equals(user.getEmail())) {
+                            friendsReference.child(user.getUid()).setValue("pending");
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+            }
+        });
     }
-    */
 
 }

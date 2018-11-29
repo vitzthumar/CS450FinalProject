@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
     private ToggleButton button8;
     private ToggleButton button9;
 
-    private boolean[] preferences;
+    private boolean[] interests;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         // preferences
-        preferences = new boolean[] {false, false, false, false, false, false, false, false, false};
+        interests = new boolean[] {false, false, false, false, false, false, false, false, false};
         button1 = findViewById(R.id.toggle_button1);
         button2 = findViewById(R.id.toggle_button2);
         button3 = findViewById(R.id.toggle_button3);
@@ -134,7 +134,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Run this whenever a preference is changed
     private void buttonToggled(boolean isChecked, int buttonNumber) {
-        preferences[buttonNumber - 1] = isChecked;
+        interests[buttonNumber - 1] = isChecked;
     }
 
 
@@ -178,15 +178,15 @@ public class RegisterActivity extends AppCompatActivity {
 
                                             // add the user's preferences
                                             DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                            userReference.child(getResources().getString(R.string.preference1)).setValue(preferences[0]);
-                                            userReference.child(getResources().getString(R.string.preference2)).setValue(preferences[1]);
-                                            userReference.child(getResources().getString(R.string.preference3)).setValue(preferences[2]);
-                                            userReference.child(getResources().getString(R.string.preference4)).setValue(preferences[3]);
-                                            userReference.child(getResources().getString(R.string.preference5)).setValue(preferences[4]);
-                                            userReference.child(getResources().getString(R.string.preference6)).setValue(preferences[5]);
-                                            userReference.child(getResources().getString(R.string.preference7)).setValue(preferences[6]);
-                                            userReference.child(getResources().getString(R.string.preference8)).setValue(preferences[7]);
-                                            userReference.child(getResources().getString(R.string.preference9)).setValue(preferences[8]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests1)).setValue(interests[0]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests2)).setValue(interests[1]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests3)).setValue(interests[2]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests4)).setValue(interests[3]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests5)).setValue(interests[4]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests6)).setValue(interests[5]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests7)).setValue(interests[6]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests8)).setValue(interests[7]);
+                                            userReference.child("interests").child(getResources().getString(R.string.interests9)).setValue(interests[8]);
 
                                             // set the user's default radius to 50 km
                                             userReference.child("radius").setValue(50);
