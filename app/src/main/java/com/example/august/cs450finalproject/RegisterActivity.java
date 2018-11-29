@@ -13,22 +13,14 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.android.gms.tasks.OnFailureListener;
-
-import org.w3c.dom.Text;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -58,15 +50,15 @@ public class RegisterActivity extends AppCompatActivity {
 
         // preferences
         interests = new boolean[] {false, false, false, false, false, false, false, false, false};
-        button1 = findViewById(R.id.toggle_button1);
-        button2 = findViewById(R.id.toggle_button2);
-        button3 = findViewById(R.id.toggle_button3);
-        button4 = findViewById(R.id.toggle_button4);
-        button5 = findViewById(R.id.toggle_button5);
-        button6 = findViewById(R.id.toggle_button6);
-        button7 = findViewById(R.id.toggle_button7);
-        button8 = findViewById(R.id.toggle_button8);
-        button9 = findViewById(R.id.toggle_button9);
+        button1 = (CheckBox) findViewById(R.id.toggle_button1);
+        button2 = (CheckBox) findViewById(R.id.toggle_button2);
+        button3 = (CheckBox) findViewById(R.id.toggle_button3);
+        button4 = (CheckBox) findViewById(R.id.toggle_button4);
+        button5 = (CheckBox) findViewById(R.id.toggle_button5);
+        button6 = (CheckBox) findViewById(R.id.toggle_button6);
+        button7 = (CheckBox) findViewById(R.id.toggle_button7);
+        button8 = (CheckBox) findViewById(R.id.toggle_button8);
+        button9 = (CheckBox) findViewById(R.id.toggle_button9);
 
         button_register.setOnClickListener(new View.OnClickListener() {
             @Override

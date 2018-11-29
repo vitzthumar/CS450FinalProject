@@ -67,7 +67,7 @@ public class MainFragment extends Fragment {
     private LocationHandler handler = null;
 
     private GeoFire geofire;
-    private GeoLocation USERS_CURRENT_LOCATION;
+    private GeoLocation USERS_CURRENT_LOCATION = null;
 
     // Firebase instance
     DatabaseReference database;
@@ -108,8 +108,8 @@ public class MainFragment extends Fragment {
                         usersFriends.add(snapshot.getKey());
                     }
                 }
-                // After loading the friends. Get the location, and fetch all friends in the area
                 getFriendsOfFriends();
+                getInitialLocation();
             }
 
             @Override
@@ -143,14 +143,11 @@ public class MainFragment extends Fragment {
                             friendsOfFriends.add(snapshot.getKey());
                         }
                     }
-
-                    // After loading friends of friends. Get the users initial location
-                    getInitialLocation();
+                    // After we load all the friends of friends, show them on the DB
+                    fetchUsers(100);
                 }
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
                 }
             });
         }
@@ -201,8 +198,6 @@ public class MainFragment extends Fragment {
                     System.err.println("There was an error saving the location to GeoFire: " + error);
                 } else {
                     System.out.println("Location saved on server successfully!");
-                    // After we save our location to the DB. Fetch all the friends of friends in the area
-                    fetchUsers(100);
                 }
             }
         });
