@@ -2,10 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -14,15 +11,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ScrollingMovementMethod;
-
-import android.util.Log;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 
@@ -30,7 +21,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.firebase.geofire.LocationCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,18 +28,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashSet;
-
-import java.text.DecimalFormat;
 import java.util.HashMap;
-
-import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
 public class MainFragment extends Fragment {
@@ -76,6 +58,7 @@ public class MainFragment extends Fragment {
     private HashSet<String> usersFriends = new HashSet<>();
     private HashSet<String> friendsOfFriends = new HashSet<>();
     private ArrayList<User> friendsOfFriendsArray = new ArrayList<>();
+    private HashMap<String, ArrayList<String>> mutualFriendTracker = new HashMap<>();
     private ValueEventListener userValueListener;
     private boolean fetchedUserIds;
     private Map<String, Location> userIdsToLocations = new HashMap<>();
@@ -138,9 +121,20 @@ public class MainFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        if (!(snapshot.getKey().equals(user.getUid())) && !(usersFriends.contains(snapshot.getKey())) && !(friendsOfFriends.contains(snapshot.getKey()))) {
-                            System.out.println(snapshot.getKey() + " is a friend of friend");
-                            friendsOfFriends.add(snapshot.getKey());
+                        if (!(snapshot.getKey().equals(user.getUid())) && !(usersFriends.contains(snapshot.getKey()))) {
+                            // If inside this block, the friend of friend is not a current friend
+                            if (!(friendsOfFriends.contains(snapshot.getKey()))) {
+                                // if inside this code block, it's the first time we are encountering this friend of friend; so render
+                                System.out.println(snapshot.getKey() + " is a friend of friend");
+                                friendsOfFriends.add(snapshot.getKey());
+                            }
+                            if (mutualFriendTracker.containsKey(snapshot.getKey())) {
+                                mutualFriendTracker.get(snapshot.getKey()).add(friendsId);
+                            } else {
+                                ArrayList<String> mutualFriends = new ArrayList<>();
+                                mutualFriends.add(friendsId);
+                                mutualFriendTracker.put(snapshot.getKey(), mutualFriends);
+                            }
                         }
                     }
                 }
@@ -408,33 +402,48 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         User u = dataSource.get(getAdapterPosition());
+                        StringBuilder sb = new StringBuilder();
 
-                        // only set the map button if the other user wants their location to be displayed
-                        database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        database.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
-                                builder1.setMessage(
-                                        "Name: " + u.getName() + "\n" +
-                                                "Email: " + u.getEmail() + "\n"
-                                );
-                                builder1.setCancelable(true);
-
-                                builder1.setPositiveButton(
-                                        "Cancel",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
-                                AlertDialog alert11 = builder1.create();
-                                alert11.show();
+                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                    if (mutualFriendTracker.get(u.uuid).contains(ds.getKey())) {
+                                        sb.append(ds.child("name").getValue());
+                                        sb.append("\n");
+                                    }
+                                }
+                                buildDialogBox(u, sb);
                             }
+
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
+
                             }
                         });
+                    }
+                });
+            }
+
+            private void buildDialogBox(User u, StringBuilder sb) {
+                database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        LayoutInflater inflater= LayoutInflater.from(getContext());
+                        View view=inflater.inflate(R.layout.mutualfriendslist, null);
+
+                        TextView textview=(TextView)view.findViewById(R.id.mutualFriendList_tv);
+                        textview.setText(sb.toString());
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
+                        alertDialog.setTitle(u.getName());
+                        alertDialog.setMessage(mutualFriendTracker.get(u.uuid).size() + " Mutual Friends");
+                        alertDialog.setView(view);
+                        alertDialog.setPositiveButton("OK", null);
+                        AlertDialog alert = alertDialog.create();
+                        alert.show();
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
                     }
                 });
             }
