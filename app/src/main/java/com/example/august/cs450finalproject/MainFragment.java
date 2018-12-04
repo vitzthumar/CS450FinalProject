@@ -58,7 +58,7 @@ public class MainFragment extends Fragment {
     private HashSet<String> usersFriends = new HashSet<>();
     private HashSet<String> friendsOfFriends = new HashSet<>();
     private ArrayList<User> friendsOfFriendsArray = new ArrayList<>();
-    private HashMap<String, ArrayList<String>> mutualFriendTracker = new HashMap<>();
+    private HashMap<String, HashSet<String>> mutualFriendTracker = new HashMap<>();
     private ValueEventListener userValueListener;
     private boolean fetchedUserIds;
     private Map<String, Location> userIdsToLocations = new HashMap<>();
@@ -131,7 +131,7 @@ public class MainFragment extends Fragment {
                             if (mutualFriendTracker.containsKey(snapshot.getKey())) {
                                 mutualFriendTracker.get(snapshot.getKey()).add(friendsId);
                             } else {
-                                ArrayList<String> mutualFriends = new ArrayList<>();
+                                HashSet<String> mutualFriends = new HashSet<>();
                                 mutualFriends.add(friendsId);
                                 mutualFriendTracker.put(snapshot.getKey(), mutualFriends);
                             }
