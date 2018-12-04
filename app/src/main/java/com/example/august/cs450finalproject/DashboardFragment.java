@@ -465,6 +465,16 @@ public class DashboardFragment extends Fragment {
                                                 }
                                             });
                                 }
+
+                                // Send message button
+                                builder1.setNeutralButton(
+                                        "Send a Message",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
                                 AlertDialog alert11 = builder1.create();
                                 alert11.show();
                             }
