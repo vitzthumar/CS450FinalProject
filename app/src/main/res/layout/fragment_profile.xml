@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -64,6 +65,98 @@
             android:textOff="DISPLAY LOCATION"
             />
 
+<<<<<<< HEAD
+=======
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_gravity="center">
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests1"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests2"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests3"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests4"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests5"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests6"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests7"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests8"
+                    android:checked="false"
+                    />
+
+                <CheckBox
+                    android:id="@+id/profile_toggle_button9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interests9"
+                    android:checked="false"
+                    />
+
+            </GridLayout>
+
+        </LinearLayout>
+
+>>>>>>> fc51920980f104792931f3a2b871ded802e78e05
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -155,4 +248,4 @@
 
     </LinearLayout>
 
-</FrameLayout>
+</ScrollView>

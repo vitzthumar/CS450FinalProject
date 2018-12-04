@@ -24,4 +24,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_an_account"><u>Create an account</u></string>
+    <string name="login"><u>Login</u></string>
+    <string name="tell_us_about_some_of_your_interests"><u>Tell us about some of your interests</u></string>
 </resources>

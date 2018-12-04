@@ -1,136 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="101dp">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="56dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp">
+
+        <!--Insert the app logo here-->
+        <ImageView android:src="@drawable/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="72dp"
+            android:layout_marginBottom="24dp"
+            android:layout_gravity="center_horizontal" />
+
+        <!--  Name Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/signup_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="Name" />
+        </android.support.design.widget.TextInputLayout>
+
+        <!-- Email Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/signup_email_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:hint="Email" />
+        </android.support.design.widget.TextInputLayout>
+
+        <!-- Password Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="18dp"
+            >
+            <EditText
+                android:id="@+id/signup_password_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="Password"/>
+        </android.support.design.widget.TextInputLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="20dp"
-            android:text="Register"
-            android:textColor="#000"
-            android:textSize="30sp" />
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/signup_name_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:hint="Name"
-            android:inputType="textPersonName"
-            android:padding="10dp" />
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/signup_email_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:hint="email"
-            android:inputType="textEmailAddress"
-            android:padding="10dp" />
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/signup_password_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:hint="password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            app:passwordToggleEnabled="true" />
+            android:layout_marginBottom="8dp"
+            android:text="@string/tell_us_about_some_of_your_interests"
+            android:gravity="center"
+            android:textSize="16dip"/>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal">
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/button_register"
+            <CheckBox
+                android:id="@+id/toggle_button1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:text="Register"
-                android:textColor="#fff"
-                app:backgroundTint="#000" />
+                android:text="@string/interests1"
+                android:checked="false"
+                />
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/button_login"
+            <CheckBox
+                android:id="@+id/toggle_button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:text="Login"
-                android:textColor="#fff"
-                app:backgroundTint="#000" />
+                android:text="@string/interests2"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests3"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests4"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests5"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests6"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests7"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests8"
+                android:checked="false"
+                />
+
+            <CheckBox
+                android:id="@+id/toggle_button9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/interests9"
+                android:checked="false"
+                />
+
         </LinearLayout>
 
-        <GridLayout
-            android:layout_width="wrap_content"
+        <!-- Signup Button -->
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/button_register"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:columnCount="3"
-            android:rowCount="3"
-            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:padding="12dp"
+            android:text="Create Account"/>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:text="Already a member?"
             android:gravity="center"
-            android:layout_gravity="center">
+            android:textSize="16dip"/>
 
-            <ToggleButton
-                android:id="@+id/toggle_button1"
-                android:textOn="@string/interests1"
-                android:textOff="@string/interests1"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button2"
-                android:textOn="@string/interests2"
-                android:textOff="@string/interests2"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button3"
-                android:textOn="@string/interests3"
-                android:textOff="@string/interests3"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button4"
-                android:textOn="@string/interests4"
-                android:textOff="@string/interests4"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button5"
-                android:textOn="@string/interests5"
-                android:textOff="@string/interests5"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button6"
-                android:textOn="@string/interests6"
-                android:textOff="@string/interests6"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button7"
-                android:textOn="@string/interests7"
-                android:textOff="@string/interests7"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button8"
-                android:textOn="@string/interests8"
-                android:textOff="@string/interests8"
-                />
-            <ToggleButton
-                android:id="@+id/toggle_button9"
-                android:textOn="@string/interests9"
-                android:textOff="@string/interests9"
-                />
-
-        </GridLayout>
+        <TextView android:id="@+id/link_login"
+            android:clickable="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/login"
+            android:gravity="center"
+            android:textSize="16dip"/>
     </LinearLayout>
-
-</android.support.constraint.ConstraintLayout>
+</ScrollView>

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -61,15 +62,10 @@ public class ProfileFragment extends Fragment {
     private SeekBar radiusSeekBar;
 
     // toggle buttons
-    private ToggleButton button1;
-    private ToggleButton button2;
-    private ToggleButton button3;
-    private ToggleButton button4;
-    private ToggleButton button5;
-    private ToggleButton button6;
-    private ToggleButton button7;
-    private ToggleButton button8;
-    private ToggleButton button9;
+    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
+
+    // interests
+    private int[] interests = {R.string.interests1, R.string.interests2, R.string.interests3, R.string.interests4, R.string.interests5, R.string.interests6, R.string.interests7, R.string.interests8, R.string.interests9};
 
     private OnFragmentInteractionListener mListener;
 
@@ -160,15 +156,15 @@ public class ProfileFragment extends Fragment {
         radiusSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
 
         // preferences
-        button1 = rootView.findViewById(R.id.toggle_button1);
-        button2 = rootView.findViewById(R.id.toggle_button2);
-        button3 = rootView.findViewById(R.id.toggle_button3);
-        button4 = rootView.findViewById(R.id.toggle_button4);
-        button5 = rootView.findViewById(R.id.toggle_button5);
-        button6 = rootView.findViewById(R.id.toggle_button6);
-        button7 = rootView.findViewById(R.id.toggle_button7);
-        button8 = rootView.findViewById(R.id.toggle_button8);
-        button9 = rootView.findViewById(R.id.toggle_button9);
+        button1 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button1);
+        button2 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button2);
+        button3 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button3);
+        button4 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button4);
+        button5 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button5);
+        button6 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button6);
+        button7 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button7);
+        button8 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button8);
+        button9 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button9);
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
         userReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -199,47 +195,47 @@ public class ProfileFragment extends Fragment {
         // toggle button click listeners
         button1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button1);
+                buttonToggled(isChecked, 1);
             }
         });
         button2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button2);
+                buttonToggled(isChecked, 2);
             }
         });
         button3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button3);
+                buttonToggled(isChecked, 3);
             }
         });
         button4.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button4);
+                buttonToggled(isChecked, 4);
             }
         });
         button5.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button5);
+                buttonToggled(isChecked, 5);
             }
         });
         button6.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button6);
+                buttonToggled(isChecked, 6);
             }
         });
         button7.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button7);
+                buttonToggled(isChecked, 7);
             }
         });
         button8.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button8);
+                buttonToggled(isChecked, 8);
             }
         });
         button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, button9);
+                buttonToggled(isChecked, 9);
             }
         });
 
@@ -267,9 +263,9 @@ public class ProfileFragment extends Fragment {
     };
 
     // Run this whenever a preference is changed
-    private void buttonToggled(boolean isChecked, ToggleButton button) {
+    private void buttonToggled(boolean isChecked, int buttonNum) {
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-        userReference.child("interests").child(String.valueOf(button.getTextOn())).setValue(isChecked);
+        userReference.child("interests").child(getResources().getString(interests[buttonNum-1])).setValue(isChecked);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -301,7 +297,7 @@ public class ProfileFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    /*
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -343,5 +339,5 @@ public class ProfileFragment extends Fragment {
         canvas.drawBitmap(bitmap, transformation, paint);
         return background;
 
-    }*/
+    }
 }
