@@ -1,9 +1,16 @@
 package com.example.august.cs450finalproject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -29,6 +37,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_OK;
+
 public class ProfileFragment extends Fragment {
 
     private final static String LOGTAG = ProfileFragment.class.getSimpleName();
@@ -40,6 +52,9 @@ public class ProfileFragment extends Fragment {
     private Button logout;
     private Button deleteAccount;
     private ToggleButton displayLocation;
+
+    private ImageButton profileImage;
+    private int PICK_IMAGE_REQUEST = 1;
 
     // radius views
     private TextView radiusTextView;
@@ -100,6 +115,18 @@ public class ProfileFragment extends Fragment {
             });
             Email.setText(email);
         }
+        // profile image
+        profileImage = rootView.findViewById(R.id.profile_image);
+        profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Profile Image"), PICK_IMAGE_REQUEST);
+            }
+        });
+
         // logout and delete account on click listeners
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -273,4 +300,48 @@ public class ProfileFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    /*
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+                resizeBitmapFitXY(profileImage.getWidth(), profileImage.getHeight(), bitmap);
+
+                profileImage.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public Bitmap resizeBitmapFitXY(int width, int height, Bitmap bitmap){
+        Bitmap background = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        float originalWidth = bitmap.getWidth(), originalHeight = bitmap.getHeight();
+        Canvas canvas = new Canvas(background);
+        float scale, xTranslation = 0.0f, yTranslation = 0.0f;
+        if (originalWidth > originalHeight) {
+            scale = height/originalHeight;
+            xTranslation = (width - originalWidth * scale)/2.0f;
+        }
+        else {
+            scale = width / originalWidth;
+            yTranslation = (height - originalHeight * scale)/2.0f;
+        }
+        Matrix transformation = new Matrix();
+        transformation.postTranslate(xTranslation, yTranslation);
+        transformation.preScale(scale, scale);
+        Paint paint = new Paint();
+        paint.setFilterBitmap(true);
+        canvas.drawBitmap(bitmap, transformation, paint);
+        return background;
+
+    }*/
 }
