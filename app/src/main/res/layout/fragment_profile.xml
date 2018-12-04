@@ -64,9 +64,6 @@
             android:textOn="DISPLAY LOCATION"
             android:textOff="DISPLAY LOCATION"
             />
-
-<<<<<<< HEAD
-=======
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -156,70 +153,6 @@
 
         </LinearLayout>
 
->>>>>>> fc51920980f104792931f3a2b871ded802e78e05
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <GridLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:columnCount="3"
-                android:rowCount="3"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_gravity="center">
-
-                <ToggleButton
-                    android:id="@+id/toggle_button1"
-                    android:textOn="@string/interests1"
-                    android:textOff="@string/interests1"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button2"
-                    android:textOn="@string/interests2"
-                    android:textOff="@string/interests2"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button3"
-                    android:textOn="@string/interests3"
-                    android:textOff="@string/interests3"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button4"
-                    android:textOn="@string/interests4"
-                    android:textOff="@string/interests4"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button5"
-                    android:textOn="@string/interests5"
-                    android:textOff="@string/interests5"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button6"
-                    android:textOn="@string/interests6"
-                    android:textOff="@string/interests6"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button7"
-                    android:textOn="@string/interests7"
-                    android:textOff="@string/interests7"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button8"
-                    android:textOn="@string/interests8"
-                    android:textOff="@string/interests8"
-                    />
-                <ToggleButton
-                    android:id="@+id/toggle_button9"
-                    android:textOn="@string/interests9"
-                    android:textOff="@string/interests9"
-                    />
-
-            </GridLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -241,10 +174,6 @@
                     android:layout_gravity="center"/>
 
             </LinearLayout>
-
-        </LinearLayout>
-
-
 
     </LinearLayout>
 
