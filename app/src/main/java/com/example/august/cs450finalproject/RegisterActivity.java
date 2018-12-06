@@ -2,6 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Button button_register;
     private TextView link_login;
 
+    private static final String DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9";
+
     // toggle buttons
     private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
 
@@ -49,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         // preferences
-        interests = new boolean[] {false, false, false, false, false, false, false, false, false};
+        interests = new boolean[]{false, false, false, false, false, false, false, false, false};
         button1 = (CheckBox) findViewById(R.id.toggle_button1);
         button2 = (CheckBox) findViewById(R.id.toggle_button2);
         button3 = (CheckBox) findViewById(R.id.toggle_button3);
@@ -139,20 +142,20 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-    public void RegisterUser(){
+    public void RegisterUser() {
 
         final String Name = name.getText().toString().trim();
         final String Email = email.getText().toString().trim();
         String Password = password.getText().toString().trim();
-        if (TextUtils.isEmpty(Name)){
+        if (TextUtils.isEmpty(Name)) {
             Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (TextUtils.isEmpty(Email)){
+        if (TextUtils.isEmpty(Email)) {
             Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (TextUtils.isEmpty(Password)){
+        if (TextUtils.isEmpty(Password)) {
             Toast.makeText(this, "A Field is Empty", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -180,6 +183,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
+
                                         // add the user's preferences
                                         DatabaseReference userReference = db.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                         userReference.child("interests").child(getResources().getString(R.string.interests1)).setValue(interests[0]);
@@ -196,6 +200,10 @@ public class RegisterActivity extends AppCompatActivity {
                                         userReference.child("radius").setValue(50);
                                         // set the user's default location view to false
                                         userReference.child("display_location").setValue(false);
+
+                                        DatabaseReference urlReference = FirebaseDatabase.getInstance().getReference("URL");
+                                        urlReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(DEFAULT_PROFILE_URL);
+
                                         // Dismiss the progress dialog
                                         progressDialog.dismiss();
                                         // Show Message

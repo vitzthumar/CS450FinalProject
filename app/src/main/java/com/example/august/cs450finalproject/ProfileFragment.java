@@ -1,10 +1,14 @@
 package com.example.august.cs450finalproject;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -12,9 +16,13 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +37,8 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -40,7 +50,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,10 +65,13 @@ import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends Fragment {
 
+    private final static int PERMISSION_REQUEST_CODE = 999;
     private final static String LOGTAG = ProfileFragment.class.getSimpleName();
     // Auth stuff
     private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private FirebaseStorage firebaseStorage;
+
     private TextView Name;
     private TextView Email;
     private Button logout;
@@ -61,6 +79,8 @@ public class ProfileFragment extends Fragment {
     private ToggleButton displayLocation;
 
     private ImageButton profileImage;
+    private Bitmap profileBitmap;
+    private static final int PROFILE_WDITH = 400;
     private int PICK_IMAGE_REQUEST = 1;
 
     // radius views
@@ -87,6 +107,11 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // get read external storage permissions
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        }
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
@@ -94,9 +119,26 @@ public class ProfileFragment extends Fragment {
         Name = rootView.findViewById(R.id.profileName);
         Email = rootView.findViewById(R.id.profileEmail);
         mAuth = FirebaseAuth.getInstance();
+        firebaseStorage = FirebaseStorage.getInstance();
         logout = rootView.findViewById(R.id.button_logout);
         deleteAccount = rootView.findViewById(R.id.button_delete_account);
         user = mAuth.getCurrentUser();
+
+        // profile image
+        profileImage = rootView.findViewById(R.id.profile_image);
+
+        // load in the image referenced on Firebase
+        DatabaseReference urlReference = FirebaseDatabase.getInstance().getReference("URL");
+        urlReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                downloadFromURL(dataSnapshot.child(user.getUid()).getValue(String.class));
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
 
         // is there a current user?
         if (user != null){
@@ -108,6 +150,7 @@ public class ProfileFragment extends Fragment {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String name = dataSnapshot.getValue(String.class);
                     Name.setText(name);
+
                 }
 
                 @Override
@@ -117,17 +160,16 @@ public class ProfileFragment extends Fragment {
             });
             Email.setText(email);
         }
-        // profile image
-        profileImage = rootView.findViewById(R.id.profile_image);
+
         profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                // TODO: REMOVE OR KEEP
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Profile Image"), PICK_IMAGE_REQUEST);
+
             }
         });
 
@@ -314,15 +356,17 @@ public class ProfileFragment extends Fragment {
             Uri uri = data.getData();
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+                profileBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
 
-                //File myFile = new File(uri.toString());
-                //String realPath = myFile.getAbsolutePath();
-                //Log.e(LOGTAG, realPath);
+                // get the path and then flip the orientation if it is not upright
+                String absolutePath = getPathFromUri(getContext(), uri);
 
-                //bitmap = modifyOrientation(bitmap, realPath);
+                Bitmap modifiedBitmap = modifyOrientation(profileBitmap, absolutePath);
+                modifiedBitmap = scaleCenterCrop(modifiedBitmap, PROFILE_WDITH, PROFILE_WDITH);
 
-                profileImage.setImageBitmap(scaleCenterCrop(bitmap, 400, 400));
+                // update the profile image to the new bitmap
+                updateProfileImage(modifiedBitmap);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -349,8 +393,6 @@ public class ProfileFragment extends Fragment {
         float left = (newWidth - scaledWidth) / 2;
         float top = (newHeight - scaledHeight) / 2;
 
-        // The target rectangle for the new, scaled version of the source bitmap will now
-        // be
         RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
 
         // Finally, we create a new bitmap of the specified size and draw our new,
@@ -399,4 +441,160 @@ public class ProfileFragment extends Fragment {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
+    public static String getPathFromUri(final Context context, final Uri uri) {
+
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] {
+                        split[1]
+                };
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+
+    private void updateProfileImage(Bitmap newBitmap) {
+
+        profileImage.setEnabled(false);
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                newBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+                String storagePath = user.getUid() + ".png";
+                StorageReference storageReference = firebaseStorage.getReference(storagePath);
+
+                UploadTask uploadTask = storageReference.putBytes(data);
+                uploadTask.addOnSuccessListener(getActivity(), new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        profileImage.setImageDrawable(null);
+                        profileImage.setImageBitmap(newBitmap);
+                        profileImage.setEnabled(true);
+
+                        Uri url = taskSnapshot.getDownloadUrl();
+                        uploadURL(url);
+                    }
+
+                });
+            }
+        };
+        thread.start();
+    }
+
+    // Used to upload a url to Firebase realtime database that corresponds to that user's profile image
+    private void uploadURL(Uri url) {
+        DatabaseReference urlReference = FirebaseDatabase.getInstance().getReference("URL");
+        urlReference.child(user.getUid()).setValue(url.toString());
+    }
+
+
+    private void downloadFromURL(String url) {
+
+        StorageReference storageReference = firebaseStorage.getReferenceFromUrl(url);
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        storageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+              @Override
+              public void onSuccess(byte[] bytes) {
+
+                  // get the bitmap and then update the profile image
+                  Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                  profileImage.setImageDrawable(null);
+                  profileImage.setImageBitmap(bitmap);
+                  profileImage.setEnabled(true);
+              }
+
+              }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.e(LOGTAG, "Failed to download");
+                }
+        });
+    }
 }
