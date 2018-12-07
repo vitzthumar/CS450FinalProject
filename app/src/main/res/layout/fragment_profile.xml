@@ -64,10 +64,6 @@
             android:textOn="DISPLAY LOCATION"
             android:textOff="DISPLAY LOCATION"
             />
-<<<<<<< HEAD
-=======
-
->>>>>>> 7465a6492475c73c941421560fbace29844c1cc4
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -178,11 +174,6 @@
                     android:layout_gravity="center"/>
 
             </LinearLayout>
-
-<<<<<<< HEAD
     </LinearLayout>
-=======
-        </LinearLayout>
->>>>>>> 7465a6492475c73c941421560fbace29844c1cc4
 
 </ScrollView>

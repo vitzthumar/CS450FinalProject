@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        >
+        <ImageView
+            android:layout_width="87dp"
+            android:layout_height="27dp"
+            android:src="@drawable/ic_dashboard_black_24dp" />
+
+        <TextView
+            android:id="@+id/chat_message_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:text="TEST"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        >
+        <TextView
+            android:id="@+id/chat_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12/04/2018"
+            android:layout_marginRight="5dp"
+            />
+
+        <TextView
+            android:id="@+id/chat_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12:03:00"
+            />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dip"
+        android:background="#000000" />
+
+</LinearLayout>
