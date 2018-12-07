@@ -159,9 +159,11 @@ public class MainFragment extends Fragment {
                     }
                 }
                 Location location = handler.getLocation();
-                do {
-                    location = handler.getLocation();
-                } while (location == null);
+
+                // TODO: WHY ISNT THIS LOCATION HANDLER WORKING!???/
+//                do {
+//                    location = handler.getLocation();
+//                } while (location == null);
 
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
                 // update this user's location with new location

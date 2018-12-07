@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -352,9 +353,23 @@ public class DashboardFragment extends Fragment {
     }
 
     public void getCurrentUsersLocation() {
+        final boolean[] timerFinished = {false};
+        // Start the timer
+        new CountDownTimer(30000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                System.out.print("seconds remaining: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                timerFinished[0] = true;
+            }
+        }.start();
+
         Thread locationThread = new Thread() {
             @Override
             public void run() {
+
                 // get a new handler if there is no existing one
                 if (handler == null) {
                     // check permissions
@@ -364,9 +379,11 @@ public class DashboardFragment extends Fragment {
                     }
                 }
                 Location location;
-                do {
-                    location = handler.getLocation();
-                } while (location == null);
+
+                // TODO WHY ISNT THIA WORKING???
+//                do {
+//                    location = handler.getLocation();
+//                } while (!timerFinished[0] && location == null);
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
                 USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
