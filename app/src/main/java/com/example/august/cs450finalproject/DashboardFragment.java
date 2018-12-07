@@ -72,6 +72,7 @@ public class DashboardFragment extends Fragment {
     private HashSet<String> usersFriends = new HashSet<>();
 
     private TextView dashboard_load_message;
+    Thread locationThread;
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -85,6 +86,7 @@ public class DashboardFragment extends Fragment {
         adapter = new SimpleRVAdapter(this.users);
         setupFirebase();
         setupList();
+        getCurrentUsersLocation();
     }
 
     @Override
@@ -104,6 +106,7 @@ public class DashboardFragment extends Fragment {
         dashboard_load_message = rootView.findViewById(R.id.dashboard_load_message);
 
         // LOAD USERS FRIENDS
+        dashboard_load_message.setText("LOADING...");
         getUsersFriends();
 
 
@@ -111,7 +114,6 @@ public class DashboardFragment extends Fragment {
     }
 
     private void getUsersFriends() {
-        dashboard_load_message.setText("LOADING FRIEND");
         this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -121,12 +123,19 @@ public class DashboardFragment extends Fragment {
                         usersFriends.add(snapshot.getKey());
                     }
                 }
-                // After loading the friends. Get the location, and fetch all friends in the area
+
+                // WAIT TILL THE THREAD THAT IS GETTING THE USERS CURRENT LOCATION IS DONE!
                 try {
-                    dashboard_load_message.setText("LOADING USER LOCATION");
-                    getCurrentUsersLocation();
+                    locationThread.join(10000);
+                    if (locationThread.isAlive()) {
+                        System.out.println("IT TOOK TOO LONG, SO QUIT");
+                        // When all freinds are rendered, delete the message
+                        dashboard_load_message.setText("Error: Could not get users current location");
+                    } else {
+                        System.out.println("FINISHED");
+                        fetchUsers(100);
+                    }
                 } catch (InterruptedException e) {
-                    dashboard_load_message.setText("ERROR: Interupted Exception");
                     e.printStackTrace();
                 }
             }
@@ -138,8 +147,8 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    public void getCurrentUsersLocation() throws InterruptedException {
-        Thread locationThread = new Thread() {
+    public void getCurrentUsersLocation() {
+        locationThread = new Thread() {
             @Override
             public void run() {
                 // get a new handler if there is no existing one
@@ -162,16 +171,6 @@ public class DashboardFragment extends Fragment {
             }
         };
         locationThread.start();
-        // wait for 30 seconds. If not quit
-        locationThread.join(10000);
-        if (locationThread.isAlive()) {
-            System.out.println("IT TOOK TOO LONG, SO QUIT");
-            // When all freinds are rendered, delete the message
-            dashboard_load_message.setText("Error: Could not get users current location");
-        } else {
-            System.out.println("FINISHED");
-            fetchUsers(100);
-        }
     }
 
     /***
