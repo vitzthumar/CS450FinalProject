@@ -8,6 +8,12 @@
     tools:context=".DashboardFragment"
     >
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dashboard_load_message"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/dashboard_recyclerView"
         android:layout_width="match_parent"

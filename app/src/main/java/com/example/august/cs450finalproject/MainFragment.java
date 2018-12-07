@@ -66,6 +66,7 @@ public class MainFragment extends Fragment {
     private int initialListSize;
     private int iterationCount;
     private Set<GeoQuery> geoQueries = new HashSet<>();
+    private TextView main_load_message;
 
     // Required empty constructor
     public MainFragment() {
@@ -83,23 +84,6 @@ public class MainFragment extends Fragment {
         // Auth stuff
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if (snapshot.getValue().equals(FRIEND)) {
-                        System.out.println(snapshot.getKey() + " is a friend");
-                        usersFriends.add(snapshot.getKey());
-                    }
-                }
-                getFriendsOfFriends();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -111,6 +95,29 @@ public class MainFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // Setup adapters here
         recyclerView.setAdapter(adapter);
+
+        main_load_message = rootView.findViewById(R.id.main_load_message);
+
+        main_load_message.setText("LOADING FRIENDS");
+        // LOAD THE UI
+        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getValue().equals(FRIEND)) {
+                        System.out.println(snapshot.getKey() + " is a friend");
+                        usersFriends.add(snapshot.getKey());
+                    }
+                }
+                main_load_message.setText("LOADING FRIENDS OF FRIENDS");
+                getFriendsOfFriends();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         return rootView;
     }
@@ -143,10 +150,15 @@ public class MainFragment extends Fragment {
                 }
             });
         }
-        getInitialLocation();
+        try {
+            main_load_message.setText("LOADING USER LOCATION");
+            getInitialLocation();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void getInitialLocation() {
+    private void getInitialLocation() throws InterruptedException {
         Thread locationThread = new Thread() {
             @Override
             public void run() {
@@ -164,17 +176,22 @@ public class MainFragment extends Fragment {
 //                do {
 //                    location = handler.getLocation();
 //                } while (location == null);
-
-                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                // update this user's location with new location
-                Location l = new Location("to");
-                l.setLatitude(44.58964199);
-                l.setLongitude(-75.16173201);
                 USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
-                updateUserLocation(l);
+
             }
         };
         locationThread.start();
+        locationThread.join(10000);
+        if (locationThread.isAlive()) {
+            System.out.println("STILL RUNNING");
+            main_load_message.setText("ERROR: Cannot load users location");
+        } else {
+            System.out.println("FINISHED");
+            Location l = new Location("to");
+            l.setLatitude(USERS_CURRENT_LOCATION.latitude);
+            l.setLongitude(USERS_CURRENT_LOCATION.longitude);
+            updateUserLocation(l);
+        }
     }
 
     // Update user's current location in Firebase
@@ -199,6 +216,7 @@ public class MainFragment extends Fragment {
     }
 
     private void fetchUsers (int radius) {
+        main_load_message.setText("GETTING FRIEND OF FRIENDS IN AREA");
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
@@ -256,6 +274,7 @@ public class MainFragment extends Fragment {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
                     }
                 }
+                main_load_message.setText("");
             }
 
             private void addUserListener(String userId) {

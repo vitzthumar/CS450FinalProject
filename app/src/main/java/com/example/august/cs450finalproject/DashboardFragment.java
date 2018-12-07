@@ -42,7 +42,6 @@ import java.util.Set;
 public class DashboardFragment extends Fragment {
 
     // Instance Variables
-    private TextView dashboard_tv;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
 
@@ -72,6 +71,8 @@ public class DashboardFragment extends Fragment {
     private final static String FRIEND = "friends";
     private HashSet<String> usersFriends = new HashSet<>();
 
+    private TextView dashboard_load_message;
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -84,25 +85,6 @@ public class DashboardFragment extends Fragment {
         adapter = new SimpleRVAdapter(this.users);
         setupFirebase();
         setupList();
-
-        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if (snapshot.getValue().equals(FRIEND)) {
-                        System.out.println(snapshot.getKey() + " is a friend");
-                        usersFriends.add(snapshot.getKey());
-                    }
-                }
-                // After loading the friends. Get the location, and fetch all friends in the area
-                getCurrentUsersLocation();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -118,10 +100,78 @@ public class DashboardFragment extends Fragment {
         // Setup adapters here
         recyclerView.setAdapter(adapter);
 
-        //dashboard_tv = (TextView)rootView.findViewById(R.id.dashboard_text_view);
+
+        dashboard_load_message = rootView.findViewById(R.id.dashboard_load_message);
+
+        // LOAD USERS FRIENDS
+        getUsersFriends();
 
 
         return rootView;
+    }
+
+    private void getUsersFriends() {
+        dashboard_load_message.setText("LOADING FRIEND");
+        this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getValue().equals(FRIEND)) {
+                        System.out.println(snapshot.getKey() + " is a friend");
+                        usersFriends.add(snapshot.getKey());
+                    }
+                }
+                // After loading the friends. Get the location, and fetch all friends in the area
+                try {
+                    dashboard_load_message.setText("LOADING USER LOCATION");
+                    getCurrentUsersLocation();
+                } catch (InterruptedException e) {
+                    dashboard_load_message.setText("ERROR: Interupted Exception");
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getCurrentUsersLocation() throws InterruptedException {
+        Thread locationThread = new Thread() {
+            @Override
+            public void run() {
+                // get a new handler if there is no existing one
+                if (handler == null) {
+                    // check permissions
+                    handler = new LocationHandler(getActivity());
+                    if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+                    }
+                }
+                Location location;
+
+                // TODO WHY ISNT THIA WORKING???
+//                do {
+//                    location = handler.getLocation();
+//                } while (location == null);
+                // update this user's location with new location
+                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
+                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+            }
+        };
+        locationThread.start();
+        // wait for 30 seconds. If not quit
+        locationThread.join(10000);
+        if (locationThread.isAlive()) {
+            System.out.println("IT TOOK TOO LONG, SO QUIT");
+            // When all freinds are rendered, delete the message
+            dashboard_load_message.setText("Error: Could not get users current location");
+        } else {
+            System.out.println("FINISHED");
+            fetchUsers(100);
+        }
     }
 
     /***
@@ -130,6 +180,7 @@ public class DashboardFragment extends Fragment {
      * Make this so it only fetches friends
      */
     private void fetchUsers (int radius) {
+        dashboard_load_message.setText("LOADING PEOPLE IN AREA");
         // Get everyone within 100KM
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
@@ -186,6 +237,9 @@ public class DashboardFragment extends Fragment {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
                     }
+
+                    // When all freinds are rendered, delete the message
+                    dashboard_load_message.setText("");
                 }
             }
 
@@ -350,47 +404,6 @@ public class DashboardFragment extends Fragment {
         } else {
             return users.get(position);
         }
-    }
-
-    public void getCurrentUsersLocation() {
-        final boolean[] timerFinished = {false};
-        // Start the timer
-        new CountDownTimer(30000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                System.out.print("seconds remaining: " + millisUntilFinished / 1000);
-            }
-
-            public void onFinish() {
-                timerFinished[0] = true;
-            }
-        }.start();
-
-        Thread locationThread = new Thread() {
-            @Override
-            public void run() {
-
-                // get a new handler if there is no existing one
-                if (handler == null) {
-                    // check permissions
-                    handler = new LocationHandler(getActivity());
-                    if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
-                    }
-                }
-                Location location;
-
-                // TODO WHY ISNT THIA WORKING???
-//                do {
-//                    location = handler.getLocation();
-//                } while (!timerFinished[0] && location == null);
-                // update this user's location with new location
-                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
-                fetchUsers(100);
-            }
-        };
-        locationThread.start();
     }
 
     public interface OnFragmentInteractionListener {
