@@ -477,6 +477,8 @@ public class DashboardFragment extends Fragment {
                                                     intent.putExtra("OTHER_LON", String.valueOf(u.lng));
                                                     intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
                                                     intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
+                                                    intent.putExtra("USER_ID", user.getUid());
+                                                    intent.putExtra("OTHER_ID", u.uuid);
                                                     intent.putExtra("OTHER_NAME", u.name);
                                                     startActivity(intent);
                                                 }

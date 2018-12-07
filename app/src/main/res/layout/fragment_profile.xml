@@ -13,13 +13,13 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
+        <com.example.august.cs450finalproject.SquareImageButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/profile_image"
             android:gravity="center"
-            />
+            android:scaleType="fitXY"/>
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -64,6 +64,7 @@
             android:textOn="DISPLAY LOCATION"
             android:textOff="DISPLAY LOCATION"
             />
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -175,5 +176,4 @@
 
             </LinearLayout>
     </LinearLayout>
-
 </ScrollView>
