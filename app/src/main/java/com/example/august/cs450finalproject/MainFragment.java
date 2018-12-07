@@ -67,6 +67,7 @@ public class MainFragment extends Fragment {
     private int iterationCount;
     private Set<GeoQuery> geoQueries = new HashSet<>();
     private TextView main_load_message;
+    private Thread locationThread;
 
     // Required empty constructor
     public MainFragment() {
@@ -99,7 +100,13 @@ public class MainFragment extends Fragment {
         main_load_message = rootView.findViewById(R.id.main_load_message);
 
         main_load_message.setText("LOADING FRIENDS");
-        // LOAD THE UI
+
+        getFriends();
+
+        return rootView;
+    }
+
+    private void getFriends() {
         this.database.child("Friends").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -118,8 +125,6 @@ public class MainFragment extends Fragment {
 
             }
         });
-
-        return rootView;
     }
 
     public void getFriendsOfFriends () {
@@ -159,7 +164,7 @@ public class MainFragment extends Fragment {
     }
 
     private void getInitialLocation() throws InterruptedException {
-        Thread locationThread = new Thread() {
+        locationThread = new Thread() {
             @Override
             public void run() {
                 // get a new handler if there is no existing one
