@@ -85,6 +85,7 @@ public class MainFragment extends Fragment {
         // Auth stuff
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        getInitialLocation();
     }
 
     @Override
@@ -155,15 +156,25 @@ public class MainFragment extends Fragment {
                 }
             });
         }
+
         try {
-            main_load_message.setText("LOADING USER LOCATION");
-            getInitialLocation();
+            locationThread.join(10000);
+            if (locationThread.isAlive()) {
+                System.out.println("STILL RUNNING");
+                main_load_message.setText("ERROR: Cannot load users location");
+            } else {
+                System.out.println("FINISHED");
+                Location l = new Location("to");
+                l.setLatitude(USERS_CURRENT_LOCATION.latitude);
+                l.setLongitude(USERS_CURRENT_LOCATION.longitude);
+                updateUserLocation(l);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void getInitialLocation() throws InterruptedException {
+    private void getInitialLocation() {
         locationThread = new Thread() {
             @Override
             public void run() {
@@ -186,17 +197,6 @@ public class MainFragment extends Fragment {
             }
         };
         locationThread.start();
-        locationThread.join(10000);
-        if (locationThread.isAlive()) {
-            System.out.println("STILL RUNNING");
-            main_load_message.setText("ERROR: Cannot load users location");
-        } else {
-            System.out.println("FINISHED");
-            Location l = new Location("to");
-            l.setLatitude(USERS_CURRENT_LOCATION.latitude);
-            l.setLongitude(USERS_CURRENT_LOCATION.longitude);
-            updateUserLocation(l);
-        }
     }
 
     // Update user's current location in Firebase
@@ -214,8 +214,9 @@ public class MainFragment extends Fragment {
                     System.err.println("There was an error saving the location to GeoFire: " + error);
                 } else {
                     System.out.println("Location saved on server successfully!");
-                    fetchUsers(100);
                 }
+                // After we tried to save all the users to DB; fetch all the users
+                fetchUsers(100);
             }
         });
     }
