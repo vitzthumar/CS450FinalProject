@@ -503,7 +503,19 @@ public class DashboardFragment extends Fragment {
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 Intent intent = new Intent(getContext(), ChatActivity.class);
-                                                intent.putExtra("CHATTING_WITH", u.name);
+                                                String userId = user.getUid();
+                                                String friendId = u.getUuid();
+                                                String chatId = userId.compareTo(friendId) < 0 ? userId+"-"+friendId : friendId+"-"+userId;
+                                                intent.putExtra("CHAT_ID", chatId);
+                                                intent.putExtra("CHATTING_WITH", friendId);
+
+                                                database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
+                                                database.child("Chat").child(chatId).child("Users").child("User2").setValue(u.getUuid());
+
+                                                // Message Template
+//                                                database.child("Chat").child(chatId).child("Messages").push().setValue(new Message(user.getUid(), "HEY!"));
+//                                                database.child("Chat").child(chatId).child("Messages").push().setValue(new Message(u.getUuid(), "!"));
+
                                                 startActivity(intent);
                                             }
                                         });

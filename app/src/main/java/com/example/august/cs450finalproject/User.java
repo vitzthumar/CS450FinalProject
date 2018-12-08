@@ -36,14 +36,6 @@ public class User {
     // No arg constructor
     public User () {}
 
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public void setLng(Double lng) {
-        this.lng = lng;
-    }
-
     // User constructor
     public User(String name, String email) {
         // assign the parameters to the instance variables
@@ -52,6 +44,18 @@ public class User {
         this.uuid = null;
         this.lat = null;
         this.lng = null;
+    }
+
+    public User (String uuid) {
+        this.uuid = uuid;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 
     public String getName() {
