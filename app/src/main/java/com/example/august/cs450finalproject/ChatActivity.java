@@ -1,16 +1,18 @@
 package com.example.august.cs450finalproject;
-
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -30,9 +33,13 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseUser user;
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
+    private ImageView sendButton;
+    private EditText messageArea;
+    private String chatID;
 
-    private ArrayList<String> messages = new ArrayList<>();
+    private ArrayList<Message> messages = new ArrayList<>();
     private HashMap<String, String> names = new HashMap<>();
+    private HashSet<String> oldMessages = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +54,27 @@ public class ChatActivity extends AppCompatActivity {
 
         // Get intent stuff
         Intent receiveIntent = this.getIntent();
-        String chatID = receiveIntent.getStringExtra("CHAT_ID");
+        chatID = receiveIntent.getStringExtra("CHAT_ID");
         String friendId = receiveIntent.getStringExtra("CHATTING_WITH");
+
+        // Load the UI
+        sendButton = findViewById(R.id.sendButton);
+        messageArea = findViewById(R.id.chat_messageArea);
+
+        // Attach a listener to the send button
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String msg = messageArea.getText().toString().trim();
+                if (TextUtils.isEmpty(msg)) {
+                    return;
+                }
+                messageArea.setText("");
+                String unixTime = String.valueOf(System.currentTimeMillis() / 1000L);
+                Message message = new Message(user.getUid(), msg, unixTime);
+                database.child("Chat").child(chatID).child("Messages").push().setValue(message);
+            }
+        });
 
         // Map Current Users Id to name
         database.child("Users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -83,8 +109,16 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Message m = ds.getValue(Message.class);
-                    messages.add(m.getMsg());
-                    adapter.setMessages(messages);
+                    String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
+                    if (oldMessages.contains(oldMsgHash)) {
+                        // Old Message
+                        adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
+                    } else {
+                        // new message
+                        messages.add(m);
+                        adapter.setMessages(messages);
+                        oldMessages.add(oldMsgHash);
+                    }
                 }
             }
 
@@ -94,17 +128,26 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // Recycler View 1
+        // Recycler View
         recyclerView = findViewById(R.id.chat_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleRVAdapter(this.messages);
         recyclerView.setAdapter(adapter);
     }
+
+    private int getMessagePosition (String unixTime) {
+        for (int i = 0; i < messages.size(); i++) {
+            if (messages.get(i).getUnixTime().equals(unixTime)) {
+                return i;
+            }
+        }
+        return -1;
+    }
     // RECYCLER VIEW STUFF
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
-        private ArrayList<String> dataSource;
+        private ArrayList<Message> dataSource;
 
-        public SimpleRVAdapter(ArrayList<String> dataArgs) {
+        public SimpleRVAdapter(ArrayList<Message> dataArgs) {
             dataSource = dataArgs;
         }
 
@@ -117,7 +160,8 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
-            holder.messageItem.setText(dataSource.get(position));
+            holder.messageItem.setText(dataSource.get(position).getMsg());
+            holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
         }
 
         @Override
@@ -125,17 +169,19 @@ public class ChatActivity extends AppCompatActivity {
             return dataSource.size();
         }
 
-        public void setMessages(ArrayList<String> list) {
+        public void setMessages(ArrayList<Message> list) {
             dataSource = list;
             notifyDataSetChanged();
         }
 
         class SimpleViewHolder extends RecyclerView.ViewHolder {
             public TextView messageItem;
+            public TextView chatName;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 messageItem = (TextView) itemView.findViewById(R.id.chat_message_item);
+                chatName = (TextView) itemView.findViewById(R.id.chat_name);
                 Context c = itemView.getContext();
             }
         }
