@@ -34,6 +34,9 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
                 case R.id.navigation_profile:
                     switchToFragment(4);
                     return true;
+                case R.id.navigation_messages:
+                    switchToFragment(5);
+                    return true;
             }
             return false;
         }
@@ -59,6 +62,8 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
             manager.beginTransaction().replace(R.id.bottom_nav_container, new DashboardFragment()).commit();
         } else if (fragmentInt == 3) {
             manager.beginTransaction().replace(R.id.bottom_nav_container, new NotificationFragment()).commit();
+        } else if ( fragmentInt == 4 ) {
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
         } else {
             manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
         }

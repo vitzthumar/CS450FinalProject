@@ -21,4 +21,9 @@
         android:icon="@drawable/common_full_open_on_phone"
         android:title="@string/profile" />
 
+    <item
+        android:id="@+id/navigation_messages"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="Messages" />
+
 </menu>

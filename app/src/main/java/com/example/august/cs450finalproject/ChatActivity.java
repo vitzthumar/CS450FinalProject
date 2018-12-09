@@ -36,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView sendButton;
     private EditText messageArea;
     private String chatID;
+    private String friendId;
 
     private ArrayList<Message> messages = new ArrayList<>();
     private HashMap<String, String> names = new HashMap<>();
@@ -55,7 +56,7 @@ public class ChatActivity extends AppCompatActivity {
         // Get intent stuff
         Intent receiveIntent = this.getIntent();
         chatID = receiveIntent.getStringExtra("CHAT_ID");
-        String friendId = receiveIntent.getStringExtra("CHATTING_WITH");
+        friendId = receiveIntent.getStringExtra("CHATTING_WITH");
 
         // Load the UI
         sendButton = findViewById(R.id.sendButton);
