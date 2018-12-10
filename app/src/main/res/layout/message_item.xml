@@ -29,13 +29,6 @@
                 android:text="Nevaan Perera"
                 android:textSize="25dp"
                 />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hey man, whats going on?"
-                android:textSize="15dp"
-                />
         </LinearLayout>
     </LinearLayout>
 

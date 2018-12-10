@@ -24,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class MessagesFragment extends Fragment {
@@ -33,7 +34,7 @@ public class MessagesFragment extends Fragment {
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
     private TextView messageLoader;
-    private ArrayList<String> messages = new ArrayList<>();
+    private ArrayList<MessageItem> messages = new ArrayList<>();
     private HashSet<String> renderedFriends = new HashSet<>();
 
     private OnFragmentInteractionListener mListener;
@@ -73,17 +74,43 @@ public class MessagesFragment extends Fragment {
                         if (renderedFriends.contains(users[1])) {
                             adapter.notifyItemChanged(getFriendPosition(users[1]));
                         } else {
-                            messages.add(users[1]);
-                            adapter.setMessageItem(messages);
-                            renderedFriends.add(users[1]);
+                            // ACCESS Friends Name
+                            database.child("Users").child(users[1]).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
+                                    String name = x.get("name");
+                                    messages.add(new MessageItem(users[1], name));
+                                    adapter.setMessageItem(messages);
+                                    renderedFriends.add(users[1]);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
                         }
                     } else if (users[1].equals(user.getUid())) {
                         if (renderedFriends.contains(users[0])) {
                             adapter.notifyItemChanged(getFriendPosition(users[0]));
                         } else {
-                            messages.add(users[0]);
-                            adapter.setMessageItem(messages);
-                            renderedFriends.add(users[0]);
+                            // ACCESS Friends Name
+                            database.child("Users").child(users[0]).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
+                                    String name = x.get("name");
+                                    messages.add(new MessageItem(users[0], name));
+                                    adapter.setMessageItem(messages);
+                                    renderedFriends.add(users[0]);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
                         }
                     }
                 }
@@ -108,7 +135,7 @@ public class MessagesFragment extends Fragment {
 
     private int getFriendPosition (String id) {
         for (int i = 0; i < messages.size(); i++) {
-            if (messages.get(i).equals(id)) {
+            if (messages.get(i).getFriendId().equals(id)) {
                 return i;
             }
         }
@@ -146,9 +173,9 @@ public class MessagesFragment extends Fragment {
 
     // RECYCLER VIEW STUFF
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
-        private ArrayList<String> dataSource;
+        private ArrayList<MessageItem> dataSource;
 
-        public SimpleRVAdapter(ArrayList<String> dataArgs){
+        public SimpleRVAdapter(ArrayList<MessageItem> dataArgs){
             dataSource = dataArgs;
         }
 
@@ -161,7 +188,7 @@ public class MessagesFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
-            holder.friendsName.setText(dataSource.get(position));
+            holder.friendsName.setText(dataSource.get(position).getFriendName());
         }
 
         @Override
@@ -169,7 +196,7 @@ public class MessagesFragment extends Fragment {
             return dataSource.size();
         }
 
-        public void setMessageItem(ArrayList<String> list) {
+        public void setMessageItem(ArrayList<MessageItem> list) {
             dataSource = list;
             notifyDataSetChanged();
         }
@@ -187,12 +214,13 @@ public class MessagesFragment extends Fragment {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        String friendId = dataSource.get(getAdapterPosition());
+                        String friendId = dataSource.get(getAdapterPosition()).getFriendId();
                         Intent intent = new Intent(getContext(), ChatActivity.class);
                         String userId = user.getUid();
                         String chatId = userId.compareTo(friendId) < 0 ? userId+"-"+friendId : friendId+"-"+userId;
                         intent.putExtra("CHAT_ID", chatId);
                         intent.putExtra("CHATTING_WITH", friendId);
+                        intent.putExtra("USER_ID", user.getUid());
 
                         database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
                         database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);

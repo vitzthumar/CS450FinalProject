@@ -37,6 +37,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText messageArea;
     private String chatID;
     private String friendId;
+    private String userID;
 
     private ArrayList<Message> messages = new ArrayList<>();
     private HashMap<String, String> names = new HashMap<>();
@@ -57,6 +58,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent receiveIntent = this.getIntent();
         chatID = receiveIntent.getStringExtra("CHAT_ID");
         friendId = receiveIntent.getStringExtra("CHATTING_WITH");
+        userID = receiveIntent.getStringExtra("USER_ID");
 
         // Load the UI
         sendButton = findViewById(R.id.sendButton);
@@ -72,18 +74,18 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 messageArea.setText("");
                 String unixTime = String.valueOf(System.currentTimeMillis() / 1000L);
-                Message message = new Message(user.getUid(), msg, unixTime);
+                Message message = new Message(userID, msg, unixTime);
                 database.child("Chat").child(chatID).child("Messages").push().setValue(message);
             }
         });
 
         // Map Current Users Id to name
-        database.child("Users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        database.child("Users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
                 String name = x.get("name");
-                names.put(user.getUid(), name);
+                names.put(userID, name);
             }
 
             @Override

@@ -508,6 +508,7 @@ public class DashboardFragment extends Fragment {
                                                 String chatId = userId.compareTo(friendId) < 0 ? userId+"-"+friendId : friendId+"-"+userId;
                                                 intent.putExtra("CHAT_ID", chatId);
                                                 intent.putExtra("CHATTING_WITH", friendId);
+                                                intent.putExtra("USER_ID", user.getUid());
 
                                                 database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
                                                 database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);
