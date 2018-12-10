@@ -510,11 +510,7 @@ public class DashboardFragment extends Fragment {
                                                 intent.putExtra("CHATTING_WITH", friendId);
 
                                                 database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
-                                                database.child("Chat").child(chatId).child("Users").child("User2").setValue(u.getUuid());
-
-                                                // Message Template
-//                                                database.child("Chat").child(chatId).child("Messages").push().setValue(new Message(user.getUid(), "HEY!"));
-//                                                database.child("Chat").child(chatId).child("Messages").push().setValue(new Message(u.getUuid(), "!"));
+                                                database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);
 
                                                 startActivity(intent);
                                             }

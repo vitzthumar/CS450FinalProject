@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 public class BottomNavigationActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener,
         ProfileFragment.OnFragmentInteractionListener, NotificationFragment.OnFragmentInteractionListener,
-        DashboardFragment.OnFragmentInteractionListener {
+        DashboardFragment.OnFragmentInteractionListener, MessagesFragment.OnFragmentInteractionListener {
 
     private TextView mTextMessage;
 
@@ -65,7 +65,7 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         } else if ( fragmentInt == 4 ) {
             manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
         } else {
-            manager.beginTransaction().replace(R.id.bottom_nav_container, new ProfileFragment()).commit();
+            manager.beginTransaction().replace(R.id.bottom_nav_container, new MessagesFragment()).commit();
         }
     }
 
