@@ -177,7 +177,7 @@ public class ChatActivity extends AppCompatActivity {
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
                 holder.messageLayout.setLayoutParams(params);
             } else if (dataSource.get(position).getFrom().equals(friendId)) {
-                holder.messageItem.setTextColor(Color.RED);
+                holder.messageItem.setTextColor(Color.BLACK);
                 holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageIn));
 
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
