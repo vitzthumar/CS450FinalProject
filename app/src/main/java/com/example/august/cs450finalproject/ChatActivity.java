@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -165,11 +167,22 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.messageItem.setText(dataSource.get(position).getMsg());
-            holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
+            // holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
             if (dataSource.get(position).getFrom().equals(userID)){
-                holder.messageItem.setTextColor(Color.RED);
+                holder.messageItem.setTextColor(Color.BLACK);
+                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageOut));
+
+                // Alight the chat box
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                holder.messageLayout.setLayoutParams(params);
             } else if (dataSource.get(position).getFrom().equals(friendId)) {
-                holder.messageItem.setTextColor(Color.BLUE);
+                holder.messageItem.setTextColor(Color.RED);
+                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageIn));
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                holder.messageLayout.setLayoutParams(params);
             }
             recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
         }
@@ -186,12 +199,16 @@ public class ChatActivity extends AppCompatActivity {
 
         class SimpleViewHolder extends RecyclerView.ViewHolder {
             public TextView messageItem;
-            public TextView chatName;
+            public LinearLayout messageLayout;
+            public RelativeLayout relativeLayout;
+            // public TextView chatName;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 messageItem = (TextView) itemView.findViewById(R.id.chat_message_item);
-                chatName = (TextView) itemView.findViewById(R.id.chat_name);
+                messageLayout = (LinearLayout) itemView.findViewById(R.id.chat_messageLayout);
+                relativeLayout = (RelativeLayout) itemView.findViewById(R.id.chat_realativeLayout);
+                // chatName = (TextView) itemView.findViewById(R.id.chat_name);
                 Context c = itemView.getContext();
             }
         }
