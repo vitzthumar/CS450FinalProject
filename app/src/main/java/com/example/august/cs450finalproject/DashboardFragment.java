@@ -11,13 +11,11 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -285,12 +283,23 @@ public class DashboardFragment extends Fragment {
                 Location location = userIdsToLocations.get(dataSnapshot.getKey());
                 u.setLat(location.getLatitude());
                 u.setLng(location.getLongitude());
-                u.setImageURL("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/LuKcAJhn1wSR9Scb5giPs4NE7Us2.png?alt=media&token=d991f879-7d38-4e9a-b0ff-c3e52f3c1409");
-                if (users.contains(u)) {
-                    userUpdated(u);
-                } else {
-                    newUser(u);
-                }
+                u.setImageURL("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9");
+                // Get the users profile image
+                database.child("URL").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        u.setImageURL(dataSnapshot.getValue().toString());
+                        if (users.contains(u)) {
+                            userUpdated(u);
+                        } else {
+                            newUser(u);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             private void newUser(User u) {
