@@ -6,4 +6,5 @@
     <color name="messageIn">#ADD8E6</color>
     <color name="messageOut">#F0CA54</color>
     <color name="appOrange">#D26011</color>
+    <color name="appWhite">#FFFFFF</color>
 </resources>

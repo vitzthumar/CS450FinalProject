@@ -68,8 +68,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/display_location"
                     android:textOn="@string/display_my_location"
-                    android:textOff="@string/dont_display_my_location"
-                    />
+                    android:textOff="@string/dont_display_my_location" />
 
                 <TextView
                     android:id="@+id/radius_text_view"
@@ -83,7 +82,7 @@
                     android:max="100"
                     android:progress="50"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 

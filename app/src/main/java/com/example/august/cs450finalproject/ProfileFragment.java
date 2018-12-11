@@ -87,7 +87,7 @@ public class ProfileFragment extends Fragment {
     private SeekBar radiusSeekBar;
 
     // toggle buttons
-    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
+    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8;
 
     // interests
     private int[] interests = {R.string.interests1, R.string.interests2, R.string.interests3, R.string.interests4, R.string.interests5, R.string.interests6, R.string.interests7, R.string.interests8};
