@@ -6,23 +6,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,6 +37,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +82,8 @@ public class DashboardFragment extends Fragment {
 
     private TextView dashboard_load_message;
     Thread locationThread;
+
+    private FirebaseStorage firebaseStorage;
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -274,6 +285,7 @@ public class DashboardFragment extends Fragment {
                 Location location = userIdsToLocations.get(dataSnapshot.getKey());
                 u.setLat(location.getLatitude());
                 u.setLng(location.getLongitude());
+                u.setImageURL("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/LuKcAJhn1wSR9Scb5giPs4NE7Us2.png?alt=media&token=d991f879-7d38-4e9a-b0ff-c3e52f3c1409");
                 if (users.contains(u)) {
                     userUpdated(u);
                 } else {
@@ -308,6 +320,7 @@ public class DashboardFragment extends Fragment {
 
     private void setupFirebase() {
         database = FirebaseDatabase.getInstance().getReference();
+        firebaseStorage = FirebaseStorage.getInstance();
         setupListeners();
     }
 
@@ -410,6 +423,8 @@ public class DashboardFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
+    // FIREBASE STORAGE
+
     // RECYCLER VIEW STUFF
     public class SimpleRVAdapter extends RecyclerView.Adapter<SimpleRVAdapter.SimpleViewHolder> {
         private ArrayList<User> dataSource;
@@ -428,6 +443,7 @@ public class DashboardFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
+            downloadFromURL(dataSource.get(position).getImageURL(), holder.friendListImage);
         }
 
         @Override
@@ -440,15 +456,40 @@ public class DashboardFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        private void downloadFromURL(String url, ImageView friendListImage) {
+
+            StorageReference storageReference = firebaseStorage.getReferenceFromUrl(url);
+
+            final long ONE_MEGABYTE = 1024 * 1024;
+            storageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+
+                    // get the bitmap and then update the profile image
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    friendListImage.setImageDrawable(null);
+                    friendListImage.setImageBitmap(bitmap);
+                    friendListImage.setEnabled(true);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    System.out.println("ERROR!");
+                }
+            });
+        }
+
         /**
          * A Simple ViewHolder for the RecyclerView
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendListName;
+            public ImageView friendListImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                friendListImage = (ImageView) itemView.findViewById(R.id.friend_list_item_image);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -524,8 +565,6 @@ public class DashboardFragment extends Fragment {
                             public void onCancelled(DatabaseError databaseError) {
                             }
                         });
-
-
                     }
                 });
             }
