@@ -133,7 +133,18 @@ public class DashboardFragment extends Fragment {
                         dashboard_load_message.setText("Error: Could not get users current location");
                     } else {
                         System.out.println("FINISHED");
-                        fetchUsers(100);
+
+                        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                int radius = dataSnapshot.child("radius").getValue(Integer.class);
+                                fetchUsers(radius);
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -180,7 +191,7 @@ public class DashboardFragment extends Fragment {
      */
     private void fetchUsers (int radius) {
         dashboard_load_message.setText("LOADING PEOPLE IN AREA");
-        // Get everyone within 100KM
+        // Get everyone within the user's radius
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
         GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);

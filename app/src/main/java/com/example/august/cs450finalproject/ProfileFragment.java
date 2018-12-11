@@ -75,7 +75,6 @@ public class ProfileFragment extends Fragment {
     private TextView Name;
     private TextView Email;
     private Button logout;
-    private Button deleteAccount;
     private ToggleButton displayLocation;
 
     private ImageButton profileImage;
@@ -121,7 +120,6 @@ public class ProfileFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
         logout = rootView.findViewById(R.id.button_logout);
-        deleteAccount = rootView.findViewById(R.id.button_delete_account);
         user = mAuth.getCurrentUser();
 
         // profile image
@@ -182,12 +180,6 @@ public class ProfileFragment extends Fragment {
                     getActivity().finish();
                     startActivity(new Intent(getContext(), LoginActivity.class));
                 }
-            }
-        });
-        deleteAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: fix this
             }
         });
         // display location

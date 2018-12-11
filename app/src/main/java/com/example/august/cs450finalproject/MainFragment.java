@@ -216,14 +216,24 @@ public class MainFragment extends Fragment {
                     System.out.println("Location saved on server successfully!");
                 }
                 // After we tried to save all the users to DB; fetch all the users
-                fetchUsers(100);
+                DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        int radius = dataSnapshot.child("radius").getValue(Integer.class);
+                        fetchUsers(radius);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
             }
         });
     }
 
     private void fetchUsers (int radius) {
         main_load_message.setText("GETTING FRIEND OF FRIENDS IN AREA");
-        // Get everyone within 100KM
+        // Get everyone within the user's radius
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
         GeoQuery geoQuery = geofire.queryAtLocation(USERS_CURRENT_LOCATION, radius);
