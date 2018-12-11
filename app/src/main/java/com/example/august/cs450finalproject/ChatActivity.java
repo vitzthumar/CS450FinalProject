@@ -1,6 +1,7 @@
 package com.example.august.cs450finalproject;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -165,6 +166,12 @@ public class ChatActivity extends AppCompatActivity {
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.messageItem.setText(dataSource.get(position).getMsg());
             holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
+            if (dataSource.get(position).getFrom().equals(userID)){
+                holder.messageItem.setTextColor(Color.RED);
+            } else if (dataSource.get(position).getFrom().equals(friendId)) {
+                holder.messageItem.setTextColor(Color.BLUE);
+            }
+            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
         }
 
         @Override
