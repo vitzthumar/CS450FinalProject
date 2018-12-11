@@ -2,6 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -80,6 +81,8 @@ public class MainFragment extends Fragment {
 
     private FirebaseStorage firebaseStorage;
 
+    ProgressDialog progressDialog;
+
     // Required empty constructor
     public MainFragment() {
     }
@@ -112,7 +115,13 @@ public class MainFragment extends Fragment {
 
         main_load_message = rootView.findViewById(R.id.main_load_message);
 
-        main_load_message.setText("LOADING FRIENDS");
+
+        progressDialog = new ProgressDialog(getContext(),
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
         getFriends();
 
@@ -129,7 +138,7 @@ public class MainFragment extends Fragment {
                         usersFriends.add(snapshot.getKey());
                     }
                 }
-                main_load_message.setText("LOADING FRIENDS OF FRIENDS");
+                progressDialog.setMessage("LOADING FRIENDS OF FRIENDS");
                 getFriendsOfFriends();
             }
 
@@ -244,7 +253,7 @@ public class MainFragment extends Fragment {
     }
 
     private void fetchUsers (int radius) {
-        main_load_message.setText("GETTING FRIEND OF FRIENDS IN AREA");
+        progressDialog.setMessage("GETTING FRIEND OF FRIENDS IN AREA");
         // Get everyone within the user's radius
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
@@ -302,6 +311,7 @@ public class MainFragment extends Fragment {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
                     }
                 }
+                progressDialog.dismiss();
                 main_load_message.setText("");
             }
 

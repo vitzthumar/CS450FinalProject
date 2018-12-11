@@ -2,6 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -83,6 +84,8 @@ public class DashboardFragment extends Fragment {
 
     private FirebaseStorage firebaseStorage;
 
+    ProgressDialog progressDialog;
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -111,11 +114,14 @@ public class DashboardFragment extends Fragment {
         // Setup adapters here
         recyclerView.setAdapter(adapter);
 
+        progressDialog = new ProgressDialog(getContext(),
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
-        dashboard_load_message = rootView.findViewById(R.id.dashboard_load_message);
-
-        // LOAD USERS FRIENDS
-        dashboard_load_message.setText("LOADING...");
+        // Get users friends
         getUsersFriends();
 
 
@@ -139,6 +145,7 @@ public class DashboardFragment extends Fragment {
                     if (locationThread.isAlive()) {
                         System.out.println("IT TOOK TOO LONG, SO QUIT");
                         // When all freinds are rendered, delete the message
+                        progressDialog.dismiss();
                         dashboard_load_message.setText("Error: Could not get users current location");
                     } else {
                         System.out.println("FINISHED");
@@ -199,7 +206,7 @@ public class DashboardFragment extends Fragment {
      * Make this so it only fetches friends
      */
     private void fetchUsers (int radius) {
-        dashboard_load_message.setText("LOADING PEOPLE IN AREA");
+        progressDialog.setMessage("LOADING PEOPLE IN AREA");
         // Get everyone within the user's radius
         // THIS IS A HARD CODED VALUE; HOW CAN WE MAKE IT DYNAMIC?? --> Pass in a constant that is the users current location?
         geofire = new GeoFire(database.child("Locations"));
@@ -258,7 +265,7 @@ public class DashboardFragment extends Fragment {
                     }
 
                     // When all freinds are rendered, delete the message
-                    dashboard_load_message.setText("");
+                    progressDialog.dismiss();
                 }
             }
 
