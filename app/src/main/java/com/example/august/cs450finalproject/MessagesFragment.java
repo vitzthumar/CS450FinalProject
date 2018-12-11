@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +27,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +43,7 @@ public class MessagesFragment extends Fragment {
     private TextView messageLoader;
     private ArrayList<MessageItem> messages = new ArrayList<>();
     private HashSet<String> renderedFriends = new HashSet<>();
+    private FirebaseStorage firebaseStorage;
 
     private OnFragmentInteractionListener mListener;
 
@@ -48,7 +56,7 @@ public class MessagesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Setup database
         database = FirebaseDatabase.getInstance().getReference();
-
+        firebaseStorage = FirebaseStorage.getInstance();
         // Get the current User
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
@@ -80,9 +88,21 @@ public class MessagesFragment extends Fragment {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
                                     String name = x.get("name");
-                                    messages.add(new MessageItem(users[1], name));
-                                    adapter.setMessageItem(messages);
-                                    renderedFriends.add(users[1]);
+
+                                    // Get the Profile Image
+                                    database.child("URL").child(users[1]).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            messages.add(new MessageItem(users[1], name, dataSnapshot.getValue().toString()));
+                                            adapter.setMessageItem(messages);
+                                            renderedFriends.add(users[1]);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -101,9 +121,21 @@ public class MessagesFragment extends Fragment {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
                                     String name = x.get("name");
-                                    messages.add(new MessageItem(users[0], name));
-                                    adapter.setMessageItem(messages);
-                                    renderedFriends.add(users[0]);
+
+                                    // Get the Profile Image
+                                    database.child("URL").child(users[0]).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            messages.add(new MessageItem(users[0], name, dataSnapshot.getValue().toString()));
+                                            adapter.setMessageItem(messages);
+                                            renderedFriends.add(users[0]);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -189,6 +221,7 @@ public class MessagesFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.friendsName.setText(dataSource.get(position).getFriendName());
+            downloadFromURL(dataSource.get(position).getImageURL(), holder.friendsImage);
         }
 
         @Override
@@ -201,15 +234,40 @@ public class MessagesFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        private void downloadFromURL(String url, ImageView friendsImage) {
+
+            StorageReference storageReference = firebaseStorage.getReferenceFromUrl(url);
+
+            final long ONE_MEGABYTE = 1024 * 1024;
+            storageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+
+                    // get the bitmap and then update the profile image
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    friendsImage.setImageDrawable(null);
+                    friendsImage.setImageBitmap(bitmap);
+                    friendsImage.setEnabled(true);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    System.out.println("ERROR!");
+                }
+            });
+        }
+
         /**
          * A Simple ViewHolder for the RecyclerView
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendsName;
+            public ImageView friendsImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendsName = (TextView) itemView.findViewById(R.id.message_friends_name);
+                friendsImage = (ImageView) itemView.findViewById(R.id.message_item_image);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
