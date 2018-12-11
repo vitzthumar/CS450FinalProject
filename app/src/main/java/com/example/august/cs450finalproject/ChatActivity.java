@@ -82,52 +82,38 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // Map Current Users Id to name
-        database.child("Users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
-                String name = x.get("name");
-                names.put(userID, name);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         database.child("Users").child(friendId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
                 String name = x.get("name");
                 names.put(friendId, name);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        database.child("Chat").child(chatID).child("Messages").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Message m = ds.getValue(Message.class);
-                    String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
-                    if (oldMessages.contains(oldMsgHash)) {
-                        // Old Message
-                        adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
-                    } else {
-                        // new message
-                        messages.add(m);
-                        adapter.setMessages(messages);
-                        oldMessages.add(oldMsgHash);
+                // Load the chat items
+                database.child("Chat").child(chatID).child("Messages").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                            Message m = ds.getValue(Message.class);
+                            String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
+                            if (oldMessages.contains(oldMsgHash)) {
+                                // Old Message
+                                adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
+                            } else {
+                                // new message
+                                messages.add(m);
+                                adapter.setMessages(messages);
+                                oldMessages.add(oldMsgHash);
+                            }
+                        }
                     }
-                }
-            }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -167,6 +153,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.messageItem.setText(dataSource.get(position).getMsg());
+            holder.friendName.setText("");
             // holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
             if (dataSource.get(position).getFrom().equals(userID)){
                 holder.messageItem.setTextColor(Color.BLACK);
@@ -179,12 +166,12 @@ public class ChatActivity extends AppCompatActivity {
             } else if (dataSource.get(position).getFrom().equals(friendId)) {
                 holder.messageItem.setTextColor(Color.BLACK);
                 holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageIn));
+                holder.friendName.setText(names.get(friendId));
 
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
                 holder.messageLayout.setLayoutParams(params);
             }
-            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
         }
 
         @Override
@@ -199,6 +186,7 @@ public class ChatActivity extends AppCompatActivity {
 
         class SimpleViewHolder extends RecyclerView.ViewHolder {
             public TextView messageItem;
+            public TextView friendName;
             public LinearLayout messageLayout;
             public RelativeLayout relativeLayout;
             // public TextView chatName;
@@ -206,6 +194,7 @@ public class ChatActivity extends AppCompatActivity {
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 messageItem = (TextView) itemView.findViewById(R.id.chat_message_item);
+                friendName = (TextView) itemView.findViewById(R.id.chat_message_name);
                 messageLayout = (LinearLayout) itemView.findViewById(R.id.chat_messageLayout);
                 relativeLayout = (RelativeLayout) itemView.findViewById(R.id.chat_realativeLayout);
                 // chatName = (TextView) itemView.findViewById(R.id.chat_name);
