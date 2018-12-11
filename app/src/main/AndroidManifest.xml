@@ -18,11 +18,9 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity">
-
             <!-- Keep this intent filter here. It's what determines what the default load screen is when the app starts -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -1,6 +1,7 @@
 package com.example.august.cs450finalproject;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,52 +82,38 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // Map Current Users Id to name
-        database.child("Users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
-                String name = x.get("name");
-                names.put(userID, name);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         database.child("Users").child(friendId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> x = (HashMap<String, String>) dataSnapshot.getValue();
                 String name = x.get("name");
                 names.put(friendId, name);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        database.child("Chat").child(chatID).child("Messages").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Message m = ds.getValue(Message.class);
-                    String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
-                    if (oldMessages.contains(oldMsgHash)) {
-                        // Old Message
-                        adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
-                    } else {
-                        // new message
-                        messages.add(m);
-                        adapter.setMessages(messages);
-                        oldMessages.add(oldMsgHash);
+                // Load the chat items
+                database.child("Chat").child(chatID).child("Messages").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                            Message m = ds.getValue(Message.class);
+                            String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
+                            if (oldMessages.contains(oldMsgHash)) {
+                                // Old Message
+                                adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
+                            } else {
+                                // new message
+                                messages.add(m);
+                                adapter.setMessages(messages);
+                                oldMessages.add(oldMsgHash);
+                            }
+                        }
                     }
-                }
-            }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -164,7 +153,25 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.messageItem.setText(dataSource.get(position).getMsg());
-            holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
+            holder.friendName.setText("");
+            // holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
+            if (dataSource.get(position).getFrom().equals(userID)){
+                holder.messageItem.setTextColor(Color.BLACK);
+                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageOut));
+
+                // Alight the chat box
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                holder.messageLayout.setLayoutParams(params);
+            } else if (dataSource.get(position).getFrom().equals(friendId)) {
+                holder.messageItem.setTextColor(Color.BLACK);
+                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageIn));
+                holder.friendName.setText(names.get(friendId));
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                holder.messageLayout.setLayoutParams(params);
+            }
         }
 
         @Override
@@ -179,12 +186,18 @@ public class ChatActivity extends AppCompatActivity {
 
         class SimpleViewHolder extends RecyclerView.ViewHolder {
             public TextView messageItem;
-            public TextView chatName;
+            public TextView friendName;
+            public LinearLayout messageLayout;
+            public RelativeLayout relativeLayout;
+            // public TextView chatName;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 messageItem = (TextView) itemView.findViewById(R.id.chat_message_item);
-                chatName = (TextView) itemView.findViewById(R.id.chat_name);
+                friendName = (TextView) itemView.findViewById(R.id.chat_message_name);
+                messageLayout = (LinearLayout) itemView.findViewById(R.id.chat_messageLayout);
+                relativeLayout = (RelativeLayout) itemView.findViewById(R.id.chat_realativeLayout);
+                // chatName = (TextView) itemView.findViewById(R.id.chat_name);
                 Context c = itemView.getContext();
             }
         }

@@ -575,7 +575,6 @@ public class ProfileFragment extends Fragment {
                   profileImage.setImageBitmap(bitmap);
                   profileImage.setEnabled(true);
               }
-
               }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {

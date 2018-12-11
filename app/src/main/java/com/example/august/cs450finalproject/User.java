@@ -32,6 +32,7 @@ public class User {
     public String uuid;
     public Double lat;
     public Double lng;
+    private String imageURL;
 
     // No arg constructor
     public User () {}
@@ -44,6 +45,7 @@ public class User {
         this.uuid = null;
         this.lat = null;
         this.lng = null;
+        this.imageURL = null;
     }
 
     public User (String uuid) {
@@ -72,6 +74,14 @@ public class User {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 
     public String getDistanceTo(GeoLocation userLocation) {
