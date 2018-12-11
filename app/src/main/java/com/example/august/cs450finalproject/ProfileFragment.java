@@ -90,7 +90,7 @@ public class ProfileFragment extends Fragment {
     private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
 
     // interests
-    private int[] interests = {R.string.interests1, R.string.interests2, R.string.interests3, R.string.interests4, R.string.interests5, R.string.interests6, R.string.interests7, R.string.interests8, R.string.interests9};
+    private int[] interests = {R.string.interests1, R.string.interests2, R.string.interests3, R.string.interests4, R.string.interests5, R.string.interests6, R.string.interests7, R.string.interests8};
 
     private OnFragmentInteractionListener mListener;
 
@@ -206,7 +206,6 @@ public class ProfileFragment extends Fragment {
         button6 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button6);
         button7 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button7);
         button8 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button8);
-        button9 = (CheckBox) rootView.findViewById(R.id.profile_toggle_button9);
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
         userReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -220,7 +219,6 @@ public class ProfileFragment extends Fragment {
                 button6.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests6)).getValue(Boolean.class));
                 button7.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests7)).getValue(Boolean.class));
                 button8.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests8)).getValue(Boolean.class));
-                button9.setChecked(dataSnapshot.child("interests").child(getResources().getString(R.string.interests9)).getValue(Boolean.class));
 
                 // set the radius and SeekBar
                 int progress = dataSnapshot.child("radius").getValue(Integer.class);
@@ -273,11 +271,6 @@ public class ProfileFragment extends Fragment {
         button8.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 buttonToggled(isChecked, 8);
-            }
-        });
-        button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, 9);
             }
         });
 
@@ -549,9 +542,6 @@ public class ProfileFragment extends Fragment {
                         profileImage.setImageBitmap(newBitmap);
                         profileImage.setEnabled(true);
 
-                        // delete the old profile image
-                        deleteOldImage();
-
                         // upload the new url
                         Uri url = taskSnapshot.getDownloadUrl();
                         uploadURL(url);
@@ -591,34 +581,6 @@ public class ProfileFragment extends Fragment {
                 public void onFailure(@NonNull Exception exception) {
                     Log.e(LOGTAG, "Failed to download");
                 }
-        });
-    }
-
-    private void deleteOldImage() {
-
-        // load in the image referenced on Firebase
-        DatabaseReference urlReference = FirebaseDatabase.getInstance().getReference("URL").child(user.getUid());
-        urlReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                StorageReference storageReference = firebaseStorage.getReferenceFromUrl(dataSnapshot.getValue(String.class));
-                storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // File deleted successfully
-                        Log.d(LOGTAG, "image deleted");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Uh-oh, an error occurred!
-                        Log.d(LOGTAG, "onFailure: did not delete file");
-                    }
-                });
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
         });
     }
 }

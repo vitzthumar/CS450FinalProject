@@ -140,14 +140,6 @@
                 android:checked="false"
                 />
 
-            <CheckBox
-                android:id="@+id/toggle_button9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/interests9"
-                android:checked="false"
-                />
-
         </LinearLayout>
 
         <!-- Signup Button -->

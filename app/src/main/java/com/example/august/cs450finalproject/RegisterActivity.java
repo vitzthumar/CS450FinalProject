@@ -35,7 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9";
 
     // toggle buttons
-    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8, button9;
+    private CheckBox button1, button2, button3, button4, button5, button6, button7, button8;
 
     private boolean[] interests;
 
@@ -61,7 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
         button6 = (CheckBox) findViewById(R.id.toggle_button6);
         button7 = (CheckBox) findViewById(R.id.toggle_button7);
         button8 = (CheckBox) findViewById(R.id.toggle_button8);
-        button9 = (CheckBox) findViewById(R.id.toggle_button9);
 
         button_register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,11 +128,6 @@ public class RegisterActivity extends AppCompatActivity {
                 buttonToggled(isChecked, 8);
             }
         });
-        button9.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonToggled(isChecked, 9);
-            }
-        });
     }
 
     // Run this whenever a preference is changed
@@ -194,7 +188,6 @@ public class RegisterActivity extends AppCompatActivity {
                                         userReference.child("interests").child(getResources().getString(R.string.interests6)).setValue(interests[5]);
                                         userReference.child("interests").child(getResources().getString(R.string.interests7)).setValue(interests[6]);
                                         userReference.child("interests").child(getResources().getString(R.string.interests8)).setValue(interests[7]);
-                                        userReference.child("interests").child(getResources().getString(R.string.interests9)).setValue(interests[8]);
 
                                         // set the user's default radius to 50 km
                                         userReference.child("radius").setValue(50);

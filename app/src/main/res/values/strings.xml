@@ -20,7 +20,6 @@
     <string name="interests6">Art</string>
     <string name="interests7">Hiking and Camping</string>
     <string name="interests8">Music</string>
-    <string name="interests9">Politics</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -118,4 +117,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="display_my_location">DISPLAY MY LOCATION</string>
+    <string name="dont_display_my_location">DON\'T DISPLAY MY LOCATION</string>
+    <string name="logout">LOGOUT</string>
 </resources>
