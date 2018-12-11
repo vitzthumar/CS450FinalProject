@@ -557,10 +557,13 @@ public class ProfileFragment extends Fragment {
                         profileImage.setImageBitmap(newBitmap);
                         profileImage.setEnabled(true);
 
+                        // delete the old profile image
+                        deleteOldImage();
+
+                        // upload the new url
                         Uri url = taskSnapshot.getDownloadUrl();
                         uploadURL(url);
                     }
-
                 });
             }
         };
@@ -583,6 +586,7 @@ public class ProfileFragment extends Fragment {
               @Override
               public void onSuccess(byte[] bytes) {
 
+
                   // get the bitmap and then update the profile image
                   Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                   profileImage.setImageDrawable(null);
@@ -595,6 +599,34 @@ public class ProfileFragment extends Fragment {
                 public void onFailure(@NonNull Exception exception) {
                     Log.e(LOGTAG, "Failed to download");
                 }
+        });
+    }
+
+    private void deleteOldImage() {
+
+        // load in the image referenced on Firebase
+        DatabaseReference urlReference = FirebaseDatabase.getInstance().getReference("URL").child(user.getUid());
+        urlReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                StorageReference storageReference = firebaseStorage.getReferenceFromUrl(dataSnapshot.getValue(String.class));
+                storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // File deleted successfully
+                        Log.d(LOGTAG, "image deleted");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Uh-oh, an error occurred!
+                        Log.d(LOGTAG, "onFailure: did not delete file");
+                    }
+                });
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 }
