@@ -294,12 +294,13 @@ public class MainFragment extends Fragment {
                 }
                 Location location = handler.getLocation();
 
-                // TODO: WHY ISNT THIS LOCATION HANDLER WORKING!???/
-//                do {
-//                    location = handler.getLocation();
-//                } while (location == null);
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
-
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
+                // update this user's location with new location
+                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
+                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
@@ -648,7 +649,7 @@ public class MainFragment extends Fragment {
                 layout.addView(mutualFriendsTitle);
                 layout.addView(mutualFriends);
 
-                database.child("Users").addValueEventListener(new ValueEventListener() {
+                database.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 

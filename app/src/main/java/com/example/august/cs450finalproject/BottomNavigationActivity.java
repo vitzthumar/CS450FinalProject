@@ -53,7 +53,7 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.bottom_nav_container, new MainFragment()).commit();
+        manager.beginTransaction().replace(R.id.bottom_nav_container, new DashboardFragment()).commit();
     }
 
     public void switchToFragment(int fragmentInt) {

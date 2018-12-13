@@ -2,19 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/friendsoffriends"
-        android:title="@string/find_friends" />
-
-    <item
         android:id="@+id/navigation_dashboard"
         android:icon="@drawable/friends"
         android:title="@string/friends" />
 
     <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@drawable/notification"
-        android:title="@string/title_notifications" />
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/friendsoffriends"
+        android:title="@string/find_friends" />
 
     <item
         android:id="@+id/navigation_profile"
@@ -25,5 +20,11 @@
         android:id="@+id/navigation_messages"
         android:icon="@drawable/chat"
         android:title="@string/messages" />
+
+    <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/notification"
+        android:title="@string/title_notifications" />
+
 
 </menu>

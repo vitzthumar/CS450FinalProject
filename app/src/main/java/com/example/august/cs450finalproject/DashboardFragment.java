@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -146,7 +147,7 @@ public class DashboardFragment extends Fragment {
                         System.out.println("IT TOOK TOO LONG, SO QUIT");
                         // When all freinds are rendered, delete the message
                         progressDialog.dismiss();
-                        dashboard_load_message.setText("Error: Could not get users current location");
+                        Toast.makeText(getContext(), "COULD NOT GET USER'S LOCATION", Toast.LENGTH_SHORT).show();
                     } else {
                         System.out.println("FINISHED");
 
@@ -188,13 +189,13 @@ public class DashboardFragment extends Fragment {
                 }
                 Location location;
 
-                // TODO WHY ISNT THIA WORKING???
-//                do {
-//                    location = handler.getLocation();
-//                } while (location == null);
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
