@@ -294,13 +294,14 @@ public class MainFragment extends Fragment {
                 }
                 Location location = handler.getLocation();
 
-                do {
-                    location = handler.getLocation();
-                } while (location == null);
+//                do {
+//                    location = handler.getLocation();
+//                } while (location == null);
+//                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
-                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
@@ -391,6 +392,7 @@ public class MainFragment extends Fragment {
                 }
                 iterationCount = 0;
 
+                // Add friends not in radius to Recycler View
                 userIdsToLocations.keySet().forEach(this::addUserListener);
                 for (String aFriendID: usersFriends) {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
@@ -645,6 +647,15 @@ public class MainFragment extends Fragment {
                 }
                 mutualFriendsTitle.setText(title);
                 mutualFriendsTitle.setGravity(Gravity.START);
+
+                if(mutualFriends.getParent() != null) {
+                    ((ViewGroup)mutualFriends.getParent()).removeView(mutualFriends); // <- fix
+                }
+
+                if(mutualFriendsTitle.getParent() != null) {
+                    ((ViewGroup)mutualFriendsTitle.getParent()).removeView(mutualFriendsTitle); // <- fix
+                }
+
                 // add the views to the linear layout
                 layout.addView(mutualFriendsTitle);
                 layout.addView(mutualFriends);
