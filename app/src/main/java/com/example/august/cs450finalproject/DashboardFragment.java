@@ -87,6 +87,8 @@ public class DashboardFragment extends Fragment {
 
     ProgressDialog progressDialog;
 
+    private TextView friendsOutsideRadius;
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -125,7 +127,7 @@ public class DashboardFragment extends Fragment {
         // Get users friends
         getUsersFriends();
 
-
+        friendsOutsideRadius = rootView.findViewById(R.id.outside_radius_friends);
         return rootView;
     }
 
@@ -263,6 +265,7 @@ public class DashboardFragment extends Fragment {
                 for (String aFriendID: usersFriends) {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
+                        friendsOutsideRadius.setText(aFriendID + "\n");
                     }
 
                     // When all freinds are rendered, delete the message

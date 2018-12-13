@@ -126,4 +126,6 @@
     <string name="send_request">SEND REQUEST</string>
     <string name="send_friend_request_via_email">Send friend request via email...</string>
     <string name="common_interests">Common interests</string>
+    <string name="friends_not_in_your_area">Friends not in your area</string>
+    <string name="friends_in_your_area">Friends in your area</string>
 </resources>
