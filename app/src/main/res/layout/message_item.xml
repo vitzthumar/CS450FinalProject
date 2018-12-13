@@ -16,7 +16,7 @@
             android:id="@+id/message_item_image"
             android:layout_width="90dp"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_dashboard_black_24dp"
+            android:src="@drawable/profileimage"
             />
 
         <LinearLayout

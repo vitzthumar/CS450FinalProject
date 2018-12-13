@@ -6,14 +6,57 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/main_load_message"
+        android:visibility="gone"
         />
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/main_recyclerView"
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </android.support.v7.widget.RecyclerView>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- TOP PORTION, FRIENDS OF FRIENDS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2.5"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/main_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </android.support.v7.widget.RecyclerView>
+
+        </LinearLayout>
+
+        <!-- BOTTOM PORTION, SEND FRIEND REQUEST -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pendingET"
+                android:inputType="textEmailAddress"
+                android:hint="@string/send_friend_request_via_email"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pendingBT"
+                android:text="@string/send_request"/>
+
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

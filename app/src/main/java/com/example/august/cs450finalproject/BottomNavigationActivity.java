@@ -48,6 +48,8 @@ public class BottomNavigationActivity extends AppCompatActivity implements MainF
         setContentView(R.layout.activity_bottom_navigation);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        // don't allow any color change to the icons
+        navigation.setItemIconTintList(null);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         FragmentManager manager = getSupportFragmentManager();

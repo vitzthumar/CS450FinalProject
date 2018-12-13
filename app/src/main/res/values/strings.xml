@@ -120,4 +120,10 @@
     <string name="display_my_location">DISPLAY MY LOCATION</string>
     <string name="dont_display_my_location">DON\'T DISPLAY MY LOCATION</string>
     <string name="logout">LOGOUT</string>
+    <string name="find_friends">Find Friends</string>
+    <string name="friends">Friends</string>
+    <string name="messages">Messages</string>
+    <string name="send_request">SEND REQUEST</string>
+    <string name="send_friend_request_via_email">Send friend request via email...</string>
+    <string name="common_interests">Common interests</string>
 </resources>

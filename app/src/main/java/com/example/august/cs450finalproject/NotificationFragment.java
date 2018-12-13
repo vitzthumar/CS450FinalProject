@@ -55,9 +55,6 @@ public class NotificationFragment extends Fragment {
         // Required empty public constructor
     }
 
-    private EditText pendingET;
-    private Button pendingBT;
-
     // TODO: Rename and change types and number of parameters
     public static NotificationFragment newInstance(String param1, String param2) {
         NotificationFragment fragment = new NotificationFragment();
@@ -140,15 +137,6 @@ public class NotificationFragment extends Fragment {
         adapter = new SimpleRVAdapter(pendingFriends);
         recyclerView.setAdapter(adapter);
 
-        this.pendingET = rootView.findViewById(R.id.pendingET);
-        this.pendingBT = rootView.findViewById(R.id.pendingBT);
-        pendingBT.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // send a friend request by passing an email
-                findUserIDFromEmail(pendingET.getText().toString());
-            }
-        });
         return rootView;
     }
 
@@ -238,7 +226,7 @@ public class NotificationFragment extends Fragment {
                         builder1.setCancelable(true);
 
                         builder1.setPositiveButton(
-                                "Cancel",
+                                "Back",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
@@ -303,56 +291,4 @@ public class NotificationFragment extends Fragment {
             }
         }
     }
-
-
-    // Find a user's ID given their email
-    private void findUserIDFromEmail(String userEmail) {
-        DatabaseReference usersReference = database.child("Users");
-        usersReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
-                    // check this child to see if its email matches the passed email
-                    if (currentSnapshot.child("email").getValue(String.class).equals(userEmail)) {
-                        // send this user a request given their ID
-                        sendFriendRequest(currentSnapshot.getKey(), userEmail);
-                        break;
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    // Send a friend request given a user's ID
-    public void sendFriendRequest(String userID, String userEmail) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // re-enable the friend request button
-                DatabaseReference friendsReference = database.child("Friends").child(userID);
-                friendsReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        boolean hasFriend = false;
-                        for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
-                            if (currentSnapshot.getKey().equals(user.getUid())) {
-                                hasFriend = true;
-                            }
-                        }
-                        // check if the other user is already friends with this user
-                        if (!hasFriend && !userEmail.equals(user.getEmail())) {
-                            friendsReference.child(user.getUid()).setValue("pending");
-                        }
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-            }
-        });
-    }
-
 }

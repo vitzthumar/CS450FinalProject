@@ -5,39 +5,36 @@
     android:layout_height="match_parent"
     tools:context=".NotificationFragment">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/notification_recyclerView"
+        <!-- TOP HALF, FRIEND REQUESTS -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
 
-        </android.support.v7.widget.RecyclerView>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/notification_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
+            </android.support.v7.widget.RecyclerView>
 
-        <EditText
+        </LinearLayout>
+
+        <!-- BOTTOM HALF, MESSAGE NOTIFICATIONS -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".5"
-            android:id="@+id/pendingET"
-            android:inputType="textEmailAddress"
-            android:hint="Send friend request via email..."/>
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:id="@+id/pendingBT"
-            android:layout_weight=".5"
-            android:text="SEND REQUEST"/>
-
-
+        </LinearLayout>
     </LinearLayout>
-
-
-
 </FrameLayout>

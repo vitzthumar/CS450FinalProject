@@ -157,15 +157,15 @@ public class ChatActivity extends AppCompatActivity {
             // holder.chatName.setText(names.get(dataSource.get(position).getFrom()));
             if (dataSource.get(position).getFrom().equals(userID)){
                 holder.messageItem.setTextColor(Color.BLACK);
-                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageOut));
+                holder.messageItem.setBackgroundColor(Color.GRAY);
 
                 // Alight the chat box
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
                 holder.messageLayout.setLayoutParams(params);
             } else if (dataSource.get(position).getFrom().equals(friendId)) {
-                holder.messageItem.setTextColor(Color.BLACK);
-                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.messageIn));
+                holder.messageItem.setTextColor(getResources().getColor(R.color.appWhite));
+                holder.messageItem.setBackgroundColor(getResources().getColor(R.color.appOrange));
                 holder.friendName.setText(names.get(friendId));
 
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);

@@ -26,7 +26,8 @@
                 android:layout_height="match_parent"
                 android:id="@+id/profile_image"
                 android:gravity="center"
-                android:scaleType="fitXY"/>
+                android:scaleType="fitXY"
+                android:backgroundTint="@color/appOrange"/>
 
         </LinearLayout>
 

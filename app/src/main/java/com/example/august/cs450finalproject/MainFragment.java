@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,11 +16,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.firebase.geofire.GeoFire;
@@ -41,6 +48,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,6 +88,9 @@ public class MainFragment extends Fragment {
     private Thread locationThread;
 
     private FirebaseStorage firebaseStorage;
+
+    private EditText pendingET;
+    private Button pendingBT;
 
     ProgressDialog progressDialog;
 
@@ -123,6 +134,17 @@ public class MainFragment extends Fragment {
         progressDialog.setMessage("Loading...");
         progressDialog.show();
 
+        this.pendingET = rootView.findViewById(R.id.pendingET);
+        this.pendingBT = rootView.findViewById(R.id.pendingBT);
+        pendingBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // send a friend request by passing an email
+                findUserIDFromEmail(pendingET.getText().toString());
+                pendingET.setText(null);
+            }
+        });
+
         getFriends();
 
         return rootView;
@@ -145,6 +167,69 @@ public class MainFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    // Find a user's ID given their email
+    private void findUserIDFromEmail(String userEmail) {
+        DatabaseReference usersReference = database.child("Users");
+        usersReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean found = false;
+                for (DataSnapshot currentSnapshot: dataSnapshot.getChildren()) {
+                    // check this child to see if its email matches the passed email
+                    if (currentSnapshot.child("email").getValue(String.class).equals(userEmail)) {
+                        // send this user a request given their ID
+                        found = true;
+                        sendFriendRequest(currentSnapshot.getKey(), userEmail);
+                        break;
+                    }
+                }
+                if (!found) {
+                    Toast.makeText(getContext(), "No user with this email was found", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    // Send a friend request given a user's ID
+    public void sendFriendRequest(String userID, String userEmail) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // re-enable the friend request button
+                DatabaseReference friendsReference = database.child("Friends").child(userID);
+                friendsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        boolean hasFriend = false;
+                        for (DataSnapshot currentSnapshot : dataSnapshot.getChildren()) {
+                            if (currentSnapshot.getKey().equals(user.getUid())) {
+                                hasFriend = true;
+                            }
+                        }
+                        // check if the other user is already friends with this user
+                        if (!hasFriend && !userEmail.equals(user.getEmail())) {
+                            friendsReference.child(user.getUid()).setValue("pending");
+                            Toast.makeText(getContext(), "Friend request sent!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (!hasFriend) {
+                                Toast.makeText(getContext(), "That's your email", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "Request already sent!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
             }
         });
     }
@@ -534,19 +619,88 @@ public class MainFragment extends Fragment {
             }
 
             private void buildDialogBox(User u, StringBuilder sb) {
-                database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                Context context = getContext();
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+                LayoutInflater inflater= LayoutInflater.from(getContext());
+                View mutualFriends = inflater.inflate(R.layout.mutualfriendslist, null);
+                TextView mutualFriendsTV = mutualFriends.findViewById(R.id.mutualFriendList_tv);
+                mutualFriendsTV.setText(sb.toString());
+                alertDialog.setTitle(u.getName());
+
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+
+                // mutual friends
+                final TextView mutualFriendsTitle = new TextView(context);
+                int mutualFriendCount = mutualFriendTracker.get(u.uuid).size();
+                String title;
+                if (mutualFriendCount > 1) {
+                    // more than 1 mutual friend
+                    title = mutualFriendCount + " mutual friends";
+                } else {
+                    // 1 mutual friend
+                    title = mutualFriendCount + " mutual friend";
+                }
+                mutualFriendsTitle.setText(title);
+                mutualFriendsTitle.setGravity(Gravity.START);
+                // add the views to the linear layout
+                layout.addView(mutualFriendsTitle);
+                layout.addView(mutualFriends);
+
+                database.child("Users").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        LayoutInflater inflater= LayoutInflater.from(getContext());
-                        View view=inflater.inflate(R.layout.mutualfriendslist, null);
 
-                        TextView textview=(TextView)view.findViewById(R.id.mutualFriendList_tv);
-                        textview.setText(sb.toString());
-                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
-                        alertDialog.setTitle(u.getName());
-                        alertDialog.setMessage(mutualFriendTracker.get(u.uuid).size() + " Mutual Friends");
-                        alertDialog.setView(view);
-                        alertDialog.setPositiveButton("OK", null);
+                        DataSnapshot otherDS = dataSnapshot.child(u.getUuid()).child("interests");
+                        DataSnapshot myDS = dataSnapshot.child(user.getUid()).child("interests");
+                        boolean[] interestArray = new boolean[8];
+                        int i = 0;
+                        for (DataSnapshot ds : otherDS.getChildren()) {
+                            boolean value = ds.getValue(Boolean.class);
+                            interestArray[i] = value;
+                            //Log.e(LOGTAG, ds.getKey()+ ", " + String.valueOf(value));
+                            i++;
+                        }
+                        i = 0;
+                        List<String> commonInterests = new ArrayList<>();
+                        for (DataSnapshot ds : myDS.getChildren()) {
+                            boolean value = ds.getValue(Boolean.class);
+                            if (value && interestArray[i]) {
+                                // this interest is shared
+                                commonInterests.add(ds.getKey());
+                            }
+                        }
+
+                        // common interests
+                        if (commonInterests.size() > 0) {
+
+                            String commonInterestBuilder = "Common interests:";
+
+                            for (int count = 0; count < commonInterests.size(); count++) {
+                                String interest = commonInterests.get(count);
+                                if (count + 1 == commonInterests.size()) {
+                                    commonInterestBuilder = commonInterestBuilder + " " + interest;
+                                } else {
+                                    commonInterestBuilder = commonInterestBuilder + " " + interest + ",";
+                                }
+                            }
+
+                            final TextView commonInterestsTV = new TextView(context);
+                            commonInterestsTV.setText(commonInterestBuilder);
+                            layout.addView(commonInterestsTV);
+                        }
+
+                        alertDialog.setView(layout);
+                        alertDialog.setPositiveButton("Back", null);
+                        alertDialog.setNeutralButton("Send Friend Request",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        sendFriendRequest(u.uuid, u.email);
+                                        dialog.cancel();
+                                    }
+                                });
                         AlertDialog alert = alertDialog.create();
                         alert.show();
                     }
