@@ -22,10 +22,25 @@
 
         <TextView
             android:id="@+id/friend_list_item_name"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="TEST"
-            android:textSize="25sp" />
+            android:text="@string/name_placeholder"
+            android:layout_weight="1"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:id="@+id/friend_list_item_distance"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/dist_placeholder"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="10dp" />
     </LinearLayout>
 
 </LinearLayout>

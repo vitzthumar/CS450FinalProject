@@ -299,7 +299,7 @@ public class ProfileFragment extends Fragment {
     // Run this whenever a preference is changed
     private void buttonToggled(boolean isChecked, int buttonNum) {
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-        userReference.child("interests").child(getResources().getString(interests[buttonNum-1])).setValue(isChecked);
+        userReference.child("interests").child(getResources().getString(interests[buttonNum - 1])).setValue(isChecked);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

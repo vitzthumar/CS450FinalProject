@@ -59,12 +59,9 @@ public class DashboardFragment extends Fragment {
     private Set<GeoQuery> geoQueries = new HashSet<>();
 
     private ArrayList<User> users = new ArrayList<>();
-    private ArrayList<User> friendsNotInRadius = new ArrayList<>();
     private ValueEventListener userValueListener;
-    private ValueEventListener friendOutRadiusValueListener;
     private boolean fetchedUserIds;
     private Set<String> userIdsWithListeners = new HashSet<>();
-    private Set<String> friendOutIdsWithListeners = new HashSet<>();
 
     private int initialListSize;
     private Map<String, Location> userIdsToLocations = new HashMap<>();
@@ -72,9 +69,6 @@ public class DashboardFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
-
-    private RecyclerView recyclerView2;
-    private SimpleRVAdapter adapter2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -93,6 +87,7 @@ public class DashboardFragment extends Fragment {
 
     ProgressDialog progressDialog;
 
+    private TextView friendsOutsideRadius;
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -104,7 +99,6 @@ public class DashboardFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         adapter = new SimpleRVAdapter(this.users);
-        adapter2 = new SimpleRVAdapter(this.friendsNotInRadius);
         setupFirebase();
         setupList();
         getCurrentUsersLocation();
@@ -119,11 +113,9 @@ public class DashboardFragment extends Fragment {
         // Recycler View 1
         recyclerView = rootView.findViewById(R.id.dashboard_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
 
-        recyclerView2 = rootView.findViewById(R.id.dashboard_recyclerView2);
-        recyclerView2.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView2.setAdapter(adapter2);
+        // Setup adapters here
+        recyclerView.setAdapter(adapter);
 
         progressDialog = new ProgressDialog(getContext(),
                 R.style.Theme_AppCompat_DayNight_Dialog_Alert);
@@ -135,6 +127,7 @@ public class DashboardFragment extends Fragment {
         // Get users friends
         getUsersFriends();
 
+        friendsOutsideRadius = rootView.findViewById(R.id.outside_radius_friends);
         return rootView;
     }
 
@@ -198,14 +191,13 @@ public class DashboardFragment extends Fragment {
                 }
                 Location location;
 
-//                do {
-//                    location = handler.getLocation();
-//                } while (location == null);
-//                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
-
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
@@ -238,15 +230,6 @@ public class DashboardFragment extends Fragment {
                         userIdsToLocations.put(key, to);
                         addUserListener(key);
                     }
-                    // If the user was in the out of radius recycler view, REMOVE THEM
-                    if (friendOutIdsWithListeners.contains(key)){
-                        int position = getFriendOutPosition(key);
-                        friendsNotInRadius.remove(position);
-                        adapter2.notifyItemRemoved(position);
-                        adapter2.notifyItemRangeChanged(position, friendsNotInRadius.size());
-                        removeFriendOutListener(key);
-                        friendOutIdsWithListeners.remove(key);
-                    }
                 }
             }
 
@@ -260,8 +243,6 @@ public class DashboardFragment extends Fragment {
                         adapter.notifyItemRemoved(position);
                         adapter.notifyItemRangeChanged(position, users.size());
                         removeUserListener(key);
-                        userIdsWithListeners.remove(key);
-                        addFriendOutRadiusListener(key);
                     }
                 }
             }
@@ -281,18 +262,15 @@ public class DashboardFragment extends Fragment {
                 iterationCount = 0;
 
                 userIdsToLocations.keySet().forEach(this::addUserListener);
-
-                progressDialog.setMessage("Loading Friends Outside Radius");
-
                 for (String aFriendID: usersFriends) {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
-                        addFriendOutRadiusListener(aFriendID);
-
+                        friendsOutsideRadius.setText(aFriendID + "\n");
                     }
+
+                    // When all freinds are rendered, delete the message
+                    progressDialog.dismiss();
                 }
-                // When all freinds are rendered, delete the message
-                progressDialog.dismiss();
             }
 
             private void addUserListener(String userId) {
@@ -302,25 +280,11 @@ public class DashboardFragment extends Fragment {
                 userIdsWithListeners.add(userId);
             }
 
-            private void addFriendOutRadiusListener(String userId) {
-                database.child("Users").child(userId)
-                        .addValueEventListener(friendOutRadiusValueListener);
-
-                friendOutIdsWithListeners.add(userId);
-            }
-
             private void removeUserListener(String userId) {
                 database.child("Users").child(userId)
                         .removeEventListener(userValueListener);
 
                 userIdsWithListeners.remove(userId);
-            }
-
-            private void removeFriendOutListener(String userId) {
-                database.child("Users").child(userId)
-                        .removeEventListener(friendOutRadiusValueListener);
-
-                friendOutIdsWithListeners.remove(userId);
             }
 
             @Override
@@ -383,52 +347,6 @@ public class DashboardFragment extends Fragment {
 
             }
         };
-
-
-        friendOutRadiusValueListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User u = dataSnapshot.getValue(User.class);
-                u.setUuid(dataSnapshot.getKey());
-                u.setImageURL("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9");
-                // Get the users profile image
-                database.child("URL").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        u.setImageURL(dataSnapshot.getValue().toString());
-                        if (friendsNotInRadius.contains(u)) {
-                            friendUpdated(u);
-                        } else {
-                            newFriend(u);
-                        }
-                    }
-
-                    private void newFriend(User u) {
-                        System.out.println("onDataChange: new user");
-                        friendsNotInRadius.add(u);
-                        adapter2.setUsers(friendsNotInRadius);
-                    }
-
-                    private void friendUpdated(User u) {
-                        System.out.println("onDataChange: update");
-                        friendsNotInRadius.add(u);
-                        adapter2.notifyItemChanged(getFriendOutPosition(u.getUuid()));
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
-
     }
 
     private void setupFirebase() {
@@ -454,15 +372,6 @@ public class DashboardFragment extends Fragment {
     private int getUserPosition(String id) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getUuid().equals(id)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int getFriendOutPosition(String id) {
-        for (int i = 0; i < friendsNotInRadius.size(); i++) {
-            if (friendsNotInRadius.get(i).getUuid().equals(id)) {
                 return i;
             }
         }
@@ -565,6 +474,8 @@ public class DashboardFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
+            String dist = dataSource.get(position).getDistanceTo(USERS_CURRENT_LOCATION);
+            holder.friendListDist.setText(dist);
             downloadFromURL(dataSource.get(position).getImageURL(), holder.friendListImage);
         }
 
@@ -618,11 +529,13 @@ public class DashboardFragment extends Fragment {
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendListName;
+            public TextView friendListDist;
             public ImageView friendListImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                friendListDist = itemView.findViewById(R.id.friend_list_item_distance);
                 friendListImage = (ImageView) itemView.findViewById(R.id.friend_list_item_image);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -630,79 +543,75 @@ public class DashboardFragment extends Fragment {
                     public void onClick(View view) {
                         User u = dataSource.get(getAdapterPosition());
 
-                        if (userIdsWithListeners.contains(u.getUuid())) {
-                            // only set the map button if the other user wants their location to be displayed
-                            database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
+                        // only set the map button if the other user wants their location to be displayed
+                        database.child("Users").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                    AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
-                                    builder1.setMessage(
-                                            "Name: " + u.getName() + "\n" +
-                                                    "Email: " + u.getEmail() + "\n" +
-                                                    "Distance to you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
-                                    );
-                                    builder1.setCancelable(true);
+                                AlertDialog.Builder builder1 = new AlertDialog.Builder(c);
+                                builder1.setMessage(
+                                        "Name: " + u.getName() + "\n" +
+                                                "Email: " + u.getEmail() + "\n" +
+                                                "Distance from you: " + u.getDistanceTo(USERS_CURRENT_LOCATION) + "\n"
+                                );
+                                builder1.setCancelable(true);
 
-                                    builder1.setPositiveButton(
-                                            "Back",
+                                builder1.setNeutralButton(
+                                        "Back",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                if (dataSnapshot.child("display_location").getValue(Boolean.class)) {
+                                    builder1.setNegativeButton(
+                                            "See on Map",
                                             new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int id) {
                                                     dialog.cancel();
-                                                }
-                                            });
 
-                                    if (dataSnapshot.child("display_location").getValue(Boolean.class)) {
-                                        builder1.setNegativeButton(
-                                                "See on Map",
-                                                new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int id) {
-                                                        dialog.cancel();
-
-                                                        // get the information about each user's location and pin them on the map
-                                                        Intent intent = new Intent(getContext(), MapsActivity.class);
-                                                        intent.putExtra("OTHER_LAT", String.valueOf(u.lat));
-                                                        intent.putExtra("OTHER_LON", String.valueOf(u.lng));
-                                                        intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
-                                                        intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
-                                                        intent.putExtra("USER_ID", user.getUid());
-                                                        intent.putExtra("OTHER_ID", u.uuid);
-                                                        intent.putExtra("OTHER_NAME", u.name);
-                                                        startActivity(intent);
-                                                    }
-                                                });
-                                    }
-
-                                    // Send message button
-                                    builder1.setNeutralButton(
-                                            "Send a Message",
-                                            new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    Intent intent = new Intent(getContext(), ChatActivity.class);
-                                                    String userId = user.getUid();
-                                                    String friendId = u.getUuid();
-                                                    String chatId = userId.compareTo(friendId) < 0 ? userId+"-"+friendId : friendId+"-"+userId;
-                                                    intent.putExtra("CHAT_ID", chatId);
-                                                    intent.putExtra("CHATTING_WITH", friendId);
+                                                    // get the information about each user's location and pin them on the map
+                                                    Intent intent = new Intent(getContext(), MapsActivity.class);
+                                                    intent.putExtra("OTHER_LAT", String.valueOf(u.lat));
+                                                    intent.putExtra("OTHER_LON", String.valueOf(u.lng));
+                                                    intent.putExtra("USER_LAT", String.valueOf(USERS_CURRENT_LOCATION.latitude));
+                                                    intent.putExtra("USER_LON", String.valueOf(USERS_CURRENT_LOCATION.longitude));
                                                     intent.putExtra("USER_ID", user.getUid());
-
-                                                    database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
-                                                    database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);
-
+                                                    intent.putExtra("OTHER_ID", u.uuid);
+                                                    intent.putExtra("OTHER_NAME", u.name);
                                                     startActivity(intent);
                                                 }
                                             });
+                                }
 
-                                    AlertDialog alert11 = builder1.create();
-                                    alert11.show();
-                                }
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                }
-                            });
-                        } else if (friendOutIdsWithListeners.contains(u.getUuid())) {
-                            // Do something when we click a friends name from outside radius
-                        }
+                                // Send message button
+                                builder1.setPositiveButton(
+                                        "Send a Message",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Intent intent = new Intent(getContext(), ChatActivity.class);
+                                                String userId = user.getUid();
+                                                String friendId = u.getUuid();
+                                                String chatId = userId.compareTo(friendId) < 0 ? userId+"-"+friendId : friendId+"-"+userId;
+                                                intent.putExtra("CHAT_ID", chatId);
+                                                intent.putExtra("CHATTING_WITH", friendId);
+                                                intent.putExtra("USER_ID", user.getUid());
+
+                                                database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
+                                                database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);
+
+                                                startActivity(intent);
+                                            }
+                                        });
+
+                                AlertDialog alert11 = builder1.create();
+                                alert11.show();
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
                     }
                 });
             }

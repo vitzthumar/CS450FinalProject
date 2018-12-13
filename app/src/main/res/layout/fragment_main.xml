@@ -27,7 +27,8 @@
             android:layout_height="0dp"
             android:layout_weight="2.5"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:background="@color/appWhite">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/main_recyclerView"
@@ -42,7 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/main_header_selector">
 
             <EditText
                 android:layout_width="match_parent"

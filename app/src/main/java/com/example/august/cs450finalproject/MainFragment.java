@@ -294,14 +294,13 @@ public class MainFragment extends Fragment {
                 }
                 Location location = handler.getLocation();
 
-//                do {
-//                    location = handler.getLocation();
-//                } while (location == null);
-//                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
-
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
@@ -392,7 +391,6 @@ public class MainFragment extends Fragment {
                 }
                 iterationCount = 0;
 
-                // Add friends not in radius to Recycler View
                 userIdsToLocations.keySet().forEach(this::addUserListener);
                 for (String aFriendID: usersFriends) {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
@@ -535,6 +533,8 @@ public class MainFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
+            String dist = dataSource.get(position).getDistanceTo(USERS_CURRENT_LOCATION);
+            holder.friendListDist.setText(dist);
             downloadFromURL(dataSource.get(position).getImageURL(), holder.friendListImage);
         }
 
@@ -587,12 +587,14 @@ public class MainFragment extends Fragment {
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendListName;
+            public TextView friendListDist;
             public ImageView friendListImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
                 friendListImage = (ImageView) itemView.findViewById(R.id.friend_list_item_image);
+                friendListDist = itemView.findViewById(R.id.friend_list_item_distance);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -640,22 +642,13 @@ public class MainFragment extends Fragment {
                 String title;
                 if (mutualFriendCount > 1) {
                     // more than 1 mutual friend
-                    title = mutualFriendCount + " mutual friends";
+                    title = mutualFriendCount + " Mutual Friends";
                 } else {
                     // 1 mutual friend
-                    title = mutualFriendCount + " mutual friend";
+                    title = mutualFriendCount + " Mutual Friend";
                 }
                 mutualFriendsTitle.setText(title);
-                mutualFriendsTitle.setGravity(Gravity.START);
-
-                if(mutualFriends.getParent() != null) {
-                    ((ViewGroup)mutualFriends.getParent()).removeView(mutualFriends); // <- fix
-                }
-
-                if(mutualFriendsTitle.getParent() != null) {
-                    ((ViewGroup)mutualFriendsTitle.getParent()).removeView(mutualFriendsTitle); // <- fix
-                }
-
+                //mutualFriendsTitle.setWidth();
                 // add the views to the linear layout
                 layout.addView(mutualFriendsTitle);
                 layout.addView(mutualFriends);
@@ -671,7 +664,6 @@ public class MainFragment extends Fragment {
                         for (DataSnapshot ds : otherDS.getChildren()) {
                             boolean value = ds.getValue(Boolean.class);
                             interestArray[i] = value;
-                            //Log.e(LOGTAG, ds.getKey()+ ", " + String.valueOf(value));
                             i++;
                         }
                         i = 0;
@@ -700,19 +692,12 @@ public class MainFragment extends Fragment {
 
                             final TextView commonInterestsTV = new TextView(context);
                             commonInterestsTV.setText(commonInterestBuilder);
+                            //commonInterestsTV.setGravity(Gravity.CENTER);
                             layout.addView(commonInterestsTV);
+                            //layout.setGravity(Gravity.CENTER);
                         }
 
                         alertDialog.setView(layout);
-                        alertDialog.setPositiveButton("Back", null);
-                        alertDialog.setNeutralButton("Send Friend Request",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int i) {
-                                        sendFriendRequest(u.uuid, u.email);
-                                        dialog.cancel();
-                                    }
-                                });
                         AlertDialog alert = alertDialog.create();
                         alert.show();
                     }

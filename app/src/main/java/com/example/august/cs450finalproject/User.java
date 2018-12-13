@@ -86,7 +86,7 @@ public class User {
 
     public String getDistanceTo(GeoLocation userLocation) {
         DecimalFormat df = new DecimalFormat("###.##");
-        return df.format(distance(this.lat, this.lng, userLocation.latitude, userLocation.longitude)) + "KM";
+        return df.format(distance(this.lat, this.lng, userLocation.latitude, userLocation.longitude)) + "km";
     }
 
     private double distance(double startLat, double startLong, double endLat, double endLong) {
