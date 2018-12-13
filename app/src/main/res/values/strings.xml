@@ -128,4 +128,6 @@
     <string name="common_interests">Common interests</string>
     <string name="friends_not_in_your_area">Friends not in your area</string>
     <string name="friends_in_your_area">Friends in your area</string>
+    <string name="name_placeholder">NAME</string>
+    <string name="dist_placeholder">dist</string>
 </resources>

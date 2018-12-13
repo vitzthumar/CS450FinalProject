@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="@color/appWhite"
+        android:layout_marginBottom="32dp">
 
         <!-- TOP HALF, INSIDE RADIUS -->
         <LinearLayout
@@ -20,14 +22,16 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            >
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/friends_in_your_area"
                 android:gravity="center"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="#000000" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/dashboard_recyclerView"
@@ -44,14 +48,17 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/main_header_selector">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/friends_not_in_your_area"
                 android:gravity="center"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:id="@+id/outside_radius_friends"
+                android:textColor="#000000"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/dashboard_recyclerView2"
@@ -71,6 +78,7 @@
             </ScrollView> -->
         </LinearLayout>
     </LinearLayout>
+
 
 
 </LinearLayout>
