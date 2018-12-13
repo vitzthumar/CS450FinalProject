@@ -281,15 +281,18 @@ public class DashboardFragment extends Fragment {
                 iterationCount = 0;
 
                 userIdsToLocations.keySet().forEach(this::addUserListener);
+
+                progressDialog.setMessage("Loading Friends Outside Radius");
+
                 for (String aFriendID: usersFriends) {
                     if (!userIdsToLocations.containsKey(aFriendID)) {
                         System.out.println("Friend " + aFriendID + " is not in the radius, but adding to all friend recycler view");
                         addFriendOutRadiusListener(aFriendID);
 
                     }
-                    // When all freinds are rendered, delete the message
-                    progressDialog.dismiss();
                 }
+                // When all freinds are rendered, delete the message
+                progressDialog.dismiss();
             }
 
             private void addUserListener(String userId) {
@@ -698,7 +701,7 @@ public class DashboardFragment extends Fragment {
                                 }
                             });
                         } else if (friendOutIdsWithListeners.contains(u.getUuid())) {
-                            Toast.makeText(getContext(), "User info not available yet", Toast.LENGTH_SHORT).show();
+                            // Do something when we click a friends name from outside radius
                         }
                     }
                 });

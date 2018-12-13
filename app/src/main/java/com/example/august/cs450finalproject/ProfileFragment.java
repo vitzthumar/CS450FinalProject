@@ -148,7 +148,6 @@ public class ProfileFragment extends Fragment {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String name = dataSnapshot.getValue(String.class);
                     Name.setText(name);
-
                 }
 
                 @Override
