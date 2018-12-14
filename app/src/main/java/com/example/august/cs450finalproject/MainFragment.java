@@ -174,7 +174,7 @@ public class MainFragment extends Fragment {
     // Find a user's ID given their email
     private void findUserIDFromEmail(String userEmail) {
         DatabaseReference usersReference = database.child("Users");
-        usersReference.addValueEventListener(new ValueEventListener() {
+        usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean found = false;

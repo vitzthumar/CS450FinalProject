@@ -28,10 +28,19 @@
                 android:id="@+id/message_friends_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nevaan Perera"
+                android:text="Nevaan Perera Manakal"
                 android:textSize="25dp"
                 />
+
+            <TextView
+                android:id="@+id/new_message_notif"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                />
         </LinearLayout>
+
     </LinearLayout>
 
     <View

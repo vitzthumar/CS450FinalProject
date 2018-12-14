@@ -26,4 +26,6 @@ public class MessageItem {
     public String getImageURL() {
         return imageURL;
     }
+
+
 }
