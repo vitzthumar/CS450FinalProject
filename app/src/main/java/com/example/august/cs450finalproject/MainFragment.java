@@ -173,6 +173,12 @@ public class MainFragment extends Fragment {
 
     // Find a user's ID given their email
     private void findUserIDFromEmail(String userEmail) {
+        progressDialog = new ProgressDialog(getContext(),
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Sending Friend Request...");
+        progressDialog.show();
         DatabaseReference usersReference = database.child("Users");
         usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -189,6 +195,7 @@ public class MainFragment extends Fragment {
                 }
                 if (!found) {
                     Toast.makeText(getContext(), "No user with this email was found", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
                 }
             }
             @Override
@@ -224,6 +231,7 @@ public class MainFragment extends Fragment {
                                 Toast.makeText(getContext(), "Request already sent!", Toast.LENGTH_SHORT).show();
                             }
                         }
+                        progressDialog.dismiss();
                     }
 
                     @Override

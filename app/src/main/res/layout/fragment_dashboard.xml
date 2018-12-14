@@ -27,6 +27,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/friends_in_your_area"
                 android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:textSize="20sp"/>
 
             <android.support.v7.widget.RecyclerView
@@ -50,6 +52,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/friends_not_in_your_area"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:gravity="center"
                 android:textSize="20sp"/>
 

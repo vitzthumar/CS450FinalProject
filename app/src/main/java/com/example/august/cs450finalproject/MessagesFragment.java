@@ -255,6 +255,7 @@ public class MessagesFragment extends Fragment {
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.friendsName.setText(dataSource.get(position).getFriendName());
             if (Integer.valueOf(unReadCountMap.get(dataSource.get(position).getFriendId())) > 0) {
+                holder.newMessageNotif.setVisibility(View.VISIBLE);
                 holder.newMessageNotif.setText(String.format(getResources().getString(R.string.new_message), unReadCountMap.get(dataSource.get(position).getFriendId())));
             }
             downloadFromURL(dataSource.get(position).getImageURL(), holder.friendsImage);
