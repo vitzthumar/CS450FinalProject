@@ -302,13 +302,12 @@ public class MainFragment extends Fragment {
                 }
                 Location location = handler.getLocation();
 
-                do {
-                    location = handler.getLocation();
-                } while (location == null);
-                // update this user's location with new location
-                //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
-                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+//                do {
+//                    location = handler.getLocation();
+//                } while (location == null);
+//                // update this user's location with new location
+//                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
