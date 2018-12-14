@@ -3,9 +3,12 @@ package com.example.august.cs450finalproject;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,8 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +29,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -51,6 +59,8 @@ public class NotificationFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private FirebaseStorage firebaseStorage;
+
     public NotificationFragment() {
         // Required empty public constructor
     }
@@ -75,6 +85,7 @@ public class NotificationFragment extends Fragment {
         setupListeners();
         adapter = new SimpleRVAdapter(this.pendingFriends);
         database = FirebaseDatabase.getInstance().getReference();
+        firebaseStorage = FirebaseStorage.getInstance();
 
         // get all the pending users
         DatabaseReference friendsReference = database.child("Friends").child(user.getUid());
@@ -108,9 +119,21 @@ public class NotificationFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
                 u.setUuid(dataSnapshot.getKey());
-                if (!pendingFriends.contains(u)) {
-                    newUser(u);
-                }
+
+                u.setImageURL("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9");
+                // Get the users profile image
+                database.child("URL").child(u.getUuid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        u.setImageURL(dataSnapshot.getValue().toString());
+                        if (!pendingFriends.contains(u)) {
+                            newUser(u);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
             }
 
             private void newUser(User u) {
@@ -191,6 +214,7 @@ public class NotificationFragment extends Fragment {
         @Override
         public void onBindViewHolder(NotificationFragment.SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
+            downloadFromURL(dataSource.get(position).getImageURL(), holder.friendListImage);
         }
 
         @Override
@@ -203,15 +227,52 @@ public class NotificationFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        private void downloadFromURL(String url, ImageView friendListImage) {
+
+            StorageReference storageReference = firebaseStorage.getReferenceFromUrl(url);
+
+            final long ONE_MEGABYTE = 1024 * 1024;
+            storageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+
+                    // get the bitmap and then update the profile image
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    friendListImage.setImageDrawable(null);
+                    friendListImage.setImageBitmap(bitmap);
+                    friendListImage.setEnabled(true);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Try getting the default
+                    StorageReference storageReference = firebaseStorage.getReferenceFromUrl("https://firebasestorage.googleapis.com/v0/b/cs450finalproject-a2875.appspot.com/o/defaultProfile.png?alt=media&token=6cf85b3d-b9e5-47ff-85c3-5e62d4a495b9");
+                    storageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+
+                            // get the bitmap and then update the profile image
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            friendListImage.setImageDrawable(null);
+                            friendListImage.setImageBitmap(bitmap);
+                            friendListImage.setEnabled(true);
+                        }
+                    });
+                }
+            });
+        }
+
         /**
          * A Simple ViewHolder for the RecyclerView
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendListName;
+            public ImageView friendListImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
+                friendListImage = (ImageView) itemView.findViewById(R.id.friend_list_item_image);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
