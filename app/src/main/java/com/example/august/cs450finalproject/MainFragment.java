@@ -698,7 +698,6 @@ public class MainFragment extends Fragment {
                                 } else {
                                     commonInterestBuilder.append(" ");
                                     commonInterestBuilder.append(interest);
-                                    commonInterestBuilder.append(" ");
                                     commonInterestBuilder.append(", ");
                                 }
                             }
