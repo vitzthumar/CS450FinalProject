@@ -36,12 +36,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        email = (EditText)findViewById(R.id.login_email_input);
-        password = (EditText)findViewById(R.id.login_password_input);
+        email = findViewById(R.id.login_email_input);
+        password = findViewById(R.id.login_password_input);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-        button = (Button)findViewById(R.id.login);
-        create_account_tv = (TextView)findViewById(R.id.link_signup);
+        button = findViewById(R.id.login);
+        create_account_tv = findViewById(R.id.link_signup);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,8 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                             progressDialog.dismiss();
                             currentUser = mAuth.getCurrentUser();
                             finish();
-                            startActivity(new Intent(getApplicationContext(),
-                                    BottomNavigationActivity.class));
+                            startActivity(new Intent(getApplicationContext(), BottomNavigationActivity.class));
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {

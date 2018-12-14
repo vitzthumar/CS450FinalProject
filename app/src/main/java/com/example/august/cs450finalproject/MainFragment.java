@@ -694,9 +694,17 @@ public class MainFragment extends Fragment {
                             commonInterestsTV.setText(commonInterestBuilder);
                             //commonInterestsTV.setGravity(Gravity.CENTER);
                             layout.addView(commonInterestsTV);
-                            //layout.setGravity(Gravity.CENTER);
+                            //layout.setGravity(Gravity.CENTER)
                         }
-
+                        alertDialog.setPositiveButton("Back", null);
+                        alertDialog.setNeutralButton("Send Friend Request",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        sendFriendRequest(u.uuid, u.email);
+                                        dialog.cancel();
+                                    }
+                                });
                         alertDialog.setView(layout);
                         AlertDialog alert = alertDialog.create();
                         alert.show();

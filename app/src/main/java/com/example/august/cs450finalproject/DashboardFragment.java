@@ -13,6 +13,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -80,7 +81,6 @@ public class DashboardFragment extends Fragment {
     private final static String FRIEND = "friends";
     private HashSet<String> usersFriends = new HashSet<>();
 
-    private TextView dashboard_load_message;
     Thread locationThread;
 
     private FirebaseStorage firebaseStorage;
@@ -88,6 +88,8 @@ public class DashboardFragment extends Fragment {
     ProgressDialog progressDialog;
 
     private TextView friendsOutsideRadius;
+
+    private BottomNavigationView bottomNavigationView;
 
     public DashboardFragment() {
         // Required empty public constructor

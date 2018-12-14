@@ -2,6 +2,7 @@ package com.example.august.cs450finalproject;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -86,6 +87,9 @@ public class ProfileFragment extends Fragment {
     private TextView radiusTextView;
     private SeekBar radiusSeekBar;
 
+    // progress dialog
+    ProgressDialog progressDialog;
+
     // toggle buttons
     private CheckBox button1, button2, button3, button4, button5, button6, button7, button8;
 
@@ -121,6 +125,12 @@ public class ProfileFragment extends Fragment {
         firebaseStorage = FirebaseStorage.getInstance();
         logout = rootView.findViewById(R.id.button_logout);
         user = mAuth.getCurrentUser();
+
+        progressDialog = new ProgressDialog(getContext(), R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
         // profile image
         profileImage = rootView.findViewById(R.id.profile_image);
@@ -272,6 +282,8 @@ public class ProfileFragment extends Fragment {
                 buttonToggled(isChecked, 8);
             }
         });
+
+
 
         return rootView;
     }
@@ -557,7 +569,6 @@ public class ProfileFragment extends Fragment {
         urlReference.child(user.getUid()).setValue(url.toString());
     }
 
-
     private void downloadFromURL(String url) {
 
         StorageReference storageReference = firebaseStorage.getReferenceFromUrl(url);
@@ -573,6 +584,9 @@ public class ProfileFragment extends Fragment {
                   profileImage.setImageDrawable(null);
                   profileImage.setImageBitmap(bitmap);
                   profileImage.setEnabled(true);
+
+                  // get rid of the progress dialog
+                  progressDialog.dismiss();
               }
               }).addOnFailureListener(new OnFailureListener() {
                 @Override
