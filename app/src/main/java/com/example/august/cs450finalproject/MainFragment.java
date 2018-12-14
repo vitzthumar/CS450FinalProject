@@ -644,6 +644,7 @@ public class MainFragment extends Fragment {
 
                 // mutual friends
                 final TextView mutualFriendsTitle = new TextView(context);
+                mutualFriendsTitle.setPadding(30,10,30,5);
                 int mutualFriendCount = mutualFriendTracker.get(u.uuid).size();
                 String title;
                 if (mutualFriendCount > 1) {
@@ -695,18 +696,23 @@ public class MainFragment extends Fragment {
                         // common interests
                         if (commonInterests.size() > 0) {
 
-                            String commonInterestBuilder = "Common interests:";
+                            StringBuilder commonInterestBuilder = new StringBuilder("Common interests: ");
 
                             for (int count = 0; count < commonInterests.size(); count++) {
                                 String interest = commonInterests.get(count);
                                 if (count + 1 == commonInterests.size()) {
-                                    commonInterestBuilder = commonInterestBuilder + " " + interest;
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(interest);
                                 } else {
-                                    commonInterestBuilder = commonInterestBuilder + " " + interest + ",";
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(interest);
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(", ");
                                 }
                             }
 
                             final TextView commonInterestsTV = new TextView(context);
+                            commonInterestsTV.setPadding(30,30,30,30);
                             commonInterestsTV.setText(commonInterestBuilder);
                             layout.addView(commonInterestsTV);
                         }
