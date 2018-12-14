@@ -46,12 +46,41 @@ public class ChatActivity extends AppCompatActivity {
     private HashMap<String, String> names = new HashMap<>();
     private HashSet<String> oldMessages = new HashSet<>();
 
+    private ValueEventListener valueEventListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         // Setup database
         database = FirebaseDatabase.getInstance().getReference();
+
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Message m = ds.getValue(Message.class);
+                    String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
+                    if (m.getRead().get(userID).equals("FALSE")) {
+                        database.child("Chat").child(chatID).child("Messages").child(ds.getKey()).child("read").child(userID).setValue("TRUE");
+                    }
+                    if (oldMessages.contains(oldMsgHash)) {
+                        // Old Message
+                        adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
+                    } else {
+                        // new message
+                        messages.add(m);
+                        adapter.setMessages(messages);
+                        oldMessages.add(oldMsgHash);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
 
         // Get the current User
         mAuth = FirebaseAuth.getInstance();
@@ -77,7 +106,10 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 messageArea.setText("");
                 String unixTime = String.valueOf(System.currentTimeMillis() / 1000L);
-                Message message = new Message(userID, msg, unixTime);
+                HashMap<String, String> read = new HashMap<>();
+                read.put(userID, "TRUE");
+                read.put(friendId, "FALSE");
+                Message message = new Message(userID, msg, unixTime, read);
                 database.child("Chat").child(chatID).child("Messages").push().setValue(message);
             }
         });
@@ -90,29 +122,7 @@ public class ChatActivity extends AppCompatActivity {
                 names.put(friendId, name);
 
                 // Load the chat items
-                database.child("Chat").child(chatID).child("Messages").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                            Message m = ds.getValue(Message.class);
-                            String oldMsgHash = m.getFrom()+"@"+m.getUnixTime();
-                            if (oldMessages.contains(oldMsgHash)) {
-                                // Old Message
-                                adapter.notifyItemChanged(getMessagePosition(m.getUnixTime()));
-                            } else {
-                                // new message
-                                messages.add(m);
-                                adapter.setMessages(messages);
-                                oldMessages.add(oldMsgHash);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                database.child("Chat").child(chatID).child("Messages").addValueEventListener(valueEventListener);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -125,6 +135,12 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleRVAdapter(this.messages);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        database.child("Chat").child(chatID).child("Messages").removeEventListener(valueEventListener);
     }
 
     private int getMessagePosition (String unixTime) {

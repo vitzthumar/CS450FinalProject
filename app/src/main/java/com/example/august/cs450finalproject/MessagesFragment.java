@@ -41,9 +41,10 @@ public class MessagesFragment extends Fragment {
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
     private TextView messageLoader;
-    private ArrayList<MessageItem> messages = new ArrayList<>();
-    private HashSet<String> renderedFriends = new HashSet<>();
+    private ArrayList<MessageItem> messages;
+    private HashSet<String> renderedFriends;
     private FirebaseStorage firebaseStorage;
+    private HashMap<String, String> unReadCountMap;
 
     private OnFragmentInteractionListener mListener;
 
@@ -60,6 +61,20 @@ public class MessagesFragment extends Fragment {
         // Get the current User
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        renderedFriends = new HashSet<>();
+        messages = new ArrayList<>();
+        unReadCountMap = new HashMap<>();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initializeUI();
     }
 
     @Override
@@ -72,12 +87,38 @@ public class MessagesFragment extends Fragment {
         messageLoader = rootView.findViewById(R.id.message_fragment_loader);
         messageLoader.setText("LOADING...");
 
+        // Recycler View
+        recyclerView = rootView.findViewById(R.id.messages_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new SimpleRVAdapter(this.messages);
+        recyclerView.setAdapter(adapter);
+
+        messageLoader.setText("");
+
+        return rootView;
+    }
+
+    private void initializeUI() {
         database.child("Chat").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    int unreadMessages = 0;
                     String[] users = ds.getKey().split("-");
+                    if (users[0].equals(user.getUid()) || users[1].equals(user.getUid())) {
+                        DataSnapshot message = (DataSnapshot) ds.child("Messages");
+                        for (DataSnapshot messageChild : message.getChildren()) {
+                            Message m = messageChild.getValue(Message.class);
+                            String UID = user.getUid();
+                            HashMap<String, String> read = m.getRead();
+                            String readStatus = read.get(UID);
+                            if (readStatus.equals("FALSE")) {
+                                unreadMessages++;
+                            }
+                        }
+                    }
                     if (users[0].equals(user.getUid())) {
+                        unReadCountMap.put(users[1], String.valueOf(unreadMessages));
                         // Do something
                         if (renderedFriends.contains(users[1])) {
                             adapter.notifyItemChanged(getFriendPosition(users[1]));
@@ -112,6 +153,8 @@ public class MessagesFragment extends Fragment {
                             });
                         }
                     } else if (users[1].equals(user.getUid())) {
+                        unReadCountMap.put(users[0], String.valueOf(unreadMessages));
+
                         if (renderedFriends.contains(users[0])) {
                             adapter.notifyItemChanged(getFriendPosition(users[0]));
                         } else {
@@ -153,16 +196,6 @@ public class MessagesFragment extends Fragment {
 
             }
         });
-
-        // Recycler View
-        recyclerView = rootView.findViewById(R.id.messages_recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new SimpleRVAdapter(this.messages);
-        recyclerView.setAdapter(adapter);
-
-        messageLoader.setText("");
-
-        return rootView;
     }
 
     private int getFriendPosition (String id) {
@@ -221,6 +254,10 @@ public class MessagesFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
             holder.friendsName.setText(dataSource.get(position).getFriendName());
+            if (Integer.valueOf(unReadCountMap.get(dataSource.get(position).getFriendId())) > 0) {
+                holder.newMessageNotif.setVisibility(View.VISIBLE);
+                holder.newMessageNotif.setText(String.format(getResources().getString(R.string.new_message), unReadCountMap.get(dataSource.get(position).getFriendId())));
+            }
             downloadFromURL(dataSource.get(position).getImageURL(), holder.friendsImage);
         }
 
@@ -273,11 +310,13 @@ public class MessagesFragment extends Fragment {
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendsName;
+            public TextView newMessageNotif;
             public ImageView friendsImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendsName = (TextView) itemView.findViewById(R.id.message_friends_name);
+                newMessageNotif = (TextView) itemView.findViewById(R.id.new_message_notif);
                 friendsImage = (ImageView) itemView.findViewById(R.id.message_item_image);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -293,7 +332,6 @@ public class MessagesFragment extends Fragment {
 
                         database.child("Chat").child(chatId).child("Users").child("User1").setValue(user.getUid());
                         database.child("Chat").child(chatId).child("Users").child("User2").setValue(friendId);
-
                         startActivity(intent);
                     }
                 });

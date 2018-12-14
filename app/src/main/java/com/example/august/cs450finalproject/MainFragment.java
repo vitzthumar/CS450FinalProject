@@ -173,8 +173,14 @@ public class MainFragment extends Fragment {
 
     // Find a user's ID given their email
     private void findUserIDFromEmail(String userEmail) {
+        progressDialog = new ProgressDialog(getContext(),
+                R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Sending Friend Request...");
+        progressDialog.show();
         DatabaseReference usersReference = database.child("Users");
-        usersReference.addValueEventListener(new ValueEventListener() {
+        usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean found = false;
@@ -189,6 +195,7 @@ public class MainFragment extends Fragment {
                 }
                 if (!found) {
                     Toast.makeText(getContext(), "No user with this email was found", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
                 }
             }
             @Override
@@ -224,6 +231,7 @@ public class MainFragment extends Fragment {
                                 Toast.makeText(getContext(), "Request already sent!", Toast.LENGTH_SHORT).show();
                             }
                         }
+                        progressDialog.dismiss();
                     }
 
                     @Override
@@ -638,6 +646,7 @@ public class MainFragment extends Fragment {
 
                 // mutual friends
                 final TextView mutualFriendsTitle = new TextView(context);
+                mutualFriendsTitle.setPadding(30,10,30,5);
                 int mutualFriendCount = mutualFriendTracker.get(u.uuid).size();
                 String title;
                 if (mutualFriendCount > 1) {
@@ -679,18 +688,23 @@ public class MainFragment extends Fragment {
                         // common interests
                         if (commonInterests.size() > 0) {
 
-                            String commonInterestBuilder = "Common interests:";
+                            StringBuilder commonInterestBuilder = new StringBuilder("Common interests: ");
 
                             for (int count = 0; count < commonInterests.size(); count++) {
                                 String interest = commonInterests.get(count);
                                 if (count + 1 == commonInterests.size()) {
-                                    commonInterestBuilder = commonInterestBuilder + " " + interest;
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(interest);
                                 } else {
-                                    commonInterestBuilder = commonInterestBuilder + " " + interest + ",";
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(interest);
+                                    commonInterestBuilder.append(" ");
+                                    commonInterestBuilder.append(", ");
                                 }
                             }
 
                             final TextView commonInterestsTV = new TextView(context);
+                            commonInterestsTV.setPadding(30,30,30,30);
                             commonInterestsTV.setText(commonInterestBuilder);
                             //commonInterestsTV.setGravity(Gravity.CENTER);
                             layout.addView(commonInterestsTV);
