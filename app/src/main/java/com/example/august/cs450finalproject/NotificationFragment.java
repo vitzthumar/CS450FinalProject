@@ -60,6 +60,7 @@ public class NotificationFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private FirebaseStorage firebaseStorage;
+    private TextView noNotifications;
 
     public NotificationFragment() {
         // Required empty public constructor
@@ -160,6 +161,8 @@ public class NotificationFragment extends Fragment {
         adapter = new SimpleRVAdapter(pendingFriends);
         recyclerView.setAdapter(adapter);
 
+        noNotifications = rootView.findViewById(R.id.noNotifications);
+
         return rootView;
     }
 
@@ -225,6 +228,9 @@ public class NotificationFragment extends Fragment {
         public void setUsers(ArrayList<User> list) {
             dataSource = list;
             notifyDataSetChanged();
+
+            recyclerView.setVisibility(View.VISIBLE);
+            noNotifications.setVisibility(View.GONE);
         }
 
         private void downloadFromURL(String url, ImageView friendListImage) {

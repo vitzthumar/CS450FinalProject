@@ -24,7 +24,7 @@
     <item
         android:id="@+id/navigation_notifications"
         android:icon="@drawable/notification"
-        android:title="@string/title_notifications" />
+        android:title="@string/friends_requests" />
 
 
 </menu>

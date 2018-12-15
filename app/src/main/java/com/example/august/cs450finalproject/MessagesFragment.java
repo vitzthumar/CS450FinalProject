@@ -42,7 +42,6 @@ public class MessagesFragment extends Fragment {
     private FirebaseUser user;
     private RecyclerView recyclerView;
     private SimpleRVAdapter adapter;
-    private TextView messageLoader;
     private ArrayList<MessageItem> messages;
     private HashSet<String> renderedFriends;
     private FirebaseStorage firebaseStorage;
@@ -87,8 +86,6 @@ public class MessagesFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_messages, container, false);
 
         // UI stuff
-        messageLoader = rootView.findViewById(R.id.message_fragment_loader);
-        messageLoader.setText("LOADING...");
 
         // Recycler View
         recyclerView = rootView.findViewById(R.id.messages_recyclerView);
@@ -96,7 +93,6 @@ public class MessagesFragment extends Fragment {
         adapter = new SimpleRVAdapter(this.messages);
         recyclerView.setAdapter(adapter);
 
-        messageLoader.setText("");
         noMessages = rootView.findViewById(R.id.noMessages);
 
         return rootView;
@@ -111,10 +107,11 @@ public class MessagesFragment extends Fragment {
                     int unreadMessages = 0;
                     String[] users = ds.getKey().split("-");
 
-
-
-
                     if (users[0].equals(user.getUid()) || users[1].equals(user.getUid())) {
+
+                        recyclerView.setVisibility(View.VISIBLE);
+                        noMessages.setVisibility(View.GONE);
+
                         DataSnapshot message = (DataSnapshot) ds.child("Messages");
                         for (DataSnapshot messageChild : message.getChildren()) {
                             Message m = messageChild.getValue(Message.class);
@@ -127,6 +124,7 @@ public class MessagesFragment extends Fragment {
                         }
                     }
                     if (users[0].equals(user.getUid())) {
+
                         unReadCountMap.put(users[1], String.valueOf(unreadMessages));
                         // Do something
                         if (renderedFriends.contains(users[1])) {
@@ -208,6 +206,7 @@ public class MessagesFragment extends Fragment {
     }
 
     private int getFriendPosition (String id) {
+
         for (int i = 0; i < messages.size(); i++) {
             if (messages.get(i).getFriendId().equals(id)) {
                 return i;
@@ -262,6 +261,7 @@ public class MessagesFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(SimpleRVAdapter.SimpleViewHolder holder, int position) {
+
             holder.friendsName.setText(dataSource.get(position).getFriendName());
             if (Integer.valueOf(unReadCountMap.get(dataSource.get(position).getFriendId())) > 0) {
                 holder.newMessageNotif.setVisibility(View.VISIBLE);
