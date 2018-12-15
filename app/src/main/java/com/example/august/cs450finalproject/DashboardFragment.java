@@ -203,14 +203,16 @@ public class DashboardFragment extends Fragment {
                 }
                 Location location;
 
+                /*
                 do {
                     location = handler.getLocation();
                 } while (location == null);
                 USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                */
 
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
