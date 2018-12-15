@@ -30,6 +30,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +47,7 @@ public class MessagesFragment extends Fragment {
     private HashSet<String> renderedFriends;
     private FirebaseStorage firebaseStorage;
     private HashMap<String, String> unReadCountMap;
+    private TextView noMessages;
 
     private OnFragmentInteractionListener mListener;
 
@@ -94,17 +97,23 @@ public class MessagesFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         messageLoader.setText("");
+        noMessages = rootView.findViewById(R.id.noMessages);
 
         return rootView;
     }
 
     private void initializeUI() {
+
         database.child("Chat").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     int unreadMessages = 0;
                     String[] users = ds.getKey().split("-");
+
+
+
+
                     if (users[0].equals(user.getUid()) || users[1].equals(user.getUid())) {
                         DataSnapshot message = (DataSnapshot) ds.child("Messages");
                         for (DataSnapshot messageChild : message.getChildren()) {

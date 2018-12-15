@@ -15,6 +15,17 @@
         android:layout_marginLeft="5dp"
         />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:id="@+id/noMessages"
+        android:textColor="#000000"
+        android:textSize="26sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="@string/you_have_no_messages_start_some_conversations"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messages_recyclerView"
         android:layout_width="match_parent"

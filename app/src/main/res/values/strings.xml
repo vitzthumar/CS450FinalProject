@@ -135,4 +135,5 @@
     <string name="no_new_people_in_your_area">No new people in your area!</string>
     <string name="no_friends_in_your_area">No friends in your area!</string>
     <string name="no_friends_outside_your_area">No friends outside your area!</string>
+    <string name="you_have_no_messages_start_some_conversations">You have no messages. Start some conversations!</string>
 </resources>
