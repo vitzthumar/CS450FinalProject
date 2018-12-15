@@ -188,6 +188,8 @@ public class ChatActivity extends AppCompatActivity {
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
                 holder.messageLayout.setLayoutParams(params);
             }
+
+            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount()-1);
         }
 
         @Override

@@ -28,8 +28,9 @@
                 android:id="@+id/message_friends_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nevaan Perera Manakal"
-                android:textSize="25dp"
+                android:text="FIRST LAST"
+                android:textColor="#000000"
+                android:textSize="25sp"
                 />
 
             <TextView

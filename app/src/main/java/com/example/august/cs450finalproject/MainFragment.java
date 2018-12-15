@@ -88,6 +88,7 @@ public class MainFragment extends Fragment {
     private Thread locationThread;
 
     private FirebaseStorage firebaseStorage;
+    private TextView noNewFriendsOfFriends;
 
     private EditText pendingET;
     private Button pendingBT;
@@ -126,7 +127,7 @@ public class MainFragment extends Fragment {
 
         main_load_message = rootView.findViewById(R.id.main_load_message);
 
-
+        noNewFriendsOfFriends = rootView.findViewById(R.id.noFriendsOfFriends);
         progressDialog = new ProgressDialog(getContext(),
                 R.style.Theme_AppCompat_DayNight_Dialog_Alert);
         progressDialog.setIndeterminate(true);
@@ -405,6 +406,12 @@ public class MainFragment extends Fragment {
                     }
                 }
                 progressDialog.dismiss();
+                if (friendsOfFriends.isEmpty()) {
+
+                    recyclerView.setVisibility(View.GONE);
+                    noNewFriendsOfFriends.setVisibility(View.VISIBLE);
+
+                }
                 main_load_message.setText("");
             }
 
@@ -634,18 +641,16 @@ public class MainFragment extends Fragment {
 
                 Context context = getContext();
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
-                LayoutInflater inflater= LayoutInflater.from(getContext());
+                LayoutInflater inflater= LayoutInflater.from(context);
                 View mutualFriends = inflater.inflate(R.layout.mutualfriendslist, null);
+
+                LinearLayout linearLayout = mutualFriends.findViewById(R.id.linearMutualFriends);
                 TextView mutualFriendsTV = mutualFriends.findViewById(R.id.mutualFriendList_tv);
                 mutualFriendsTV.setText(sb.toString());
                 alertDialog.setTitle(u.getName());
 
-                LinearLayout layout = new LinearLayout(context);
-                layout.setOrientation(LinearLayout.VERTICAL);
-
                 // mutual friends
-                final TextView mutualFriendsTitle = new TextView(context);
-                mutualFriendsTitle.setPadding(30,10,30,5);
+                TextView mutualFriendsTitle = mutualFriends.findViewById(R.id.mutualFriendListTitle);
                 int mutualFriendCount = mutualFriendTracker.get(u.uuid).size();
                 String title;
                 if (mutualFriendCount > 1) {
@@ -656,10 +661,6 @@ public class MainFragment extends Fragment {
                     title = mutualFriendCount + " Mutual Friend";
                 }
                 mutualFriendsTitle.setText(title);
-                //mutualFriendsTitle.setWidth();
-                // add the views to the linear layout
-                layout.addView(mutualFriendsTitle);
-                layout.addView(mutualFriends);
 
                 database.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -697,16 +698,12 @@ public class MainFragment extends Fragment {
                                 } else {
                                     commonInterestBuilder.append(" ");
                                     commonInterestBuilder.append(interest);
-                                    commonInterestBuilder.append(", ");
+                                    commonInterestBuilder.append(",");
                                 }
                             }
 
-                            final TextView commonInterestsTV = new TextView(context);
-                            commonInterestsTV.setPadding(30,30,30,30);
+                            final TextView commonInterestsTV = mutualFriends.findViewById(R.id.commonInterestsTV);
                             commonInterestsTV.setText(commonInterestBuilder);
-                            //commonInterestsTV.setGravity(Gravity.CENTER);
-                            layout.addView(commonInterestsTV);
-                            //layout.setGravity(Gravity.CENTER)
                         }
                         alertDialog.setPositiveButton("Back", null);
                         alertDialog.setNeutralButton("Send Friend Request",
@@ -717,7 +714,7 @@ public class MainFragment extends Fragment {
                                         dialog.cancel();
                                     }
                                 });
-                        alertDialog.setView(layout);
+                        alertDialog.setView(mutualFriends);
                         AlertDialog alert = alertDialog.create();
                         alert.show();
                     }

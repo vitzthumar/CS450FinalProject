@@ -87,10 +87,11 @@ public class DashboardFragment extends Fragment {
     private final static String FRIEND = "friends";
     private HashSet<String> usersFriends = new HashSet<>();
 
-    private TextView dashboard_load_message;
     Thread locationThread;
 
     private FirebaseStorage firebaseStorage;
+    private TextView noFriendsInRadius;
+    private TextView noFriendsOutRadius;
 
     ProgressDialog progressDialog;
 
@@ -133,6 +134,9 @@ public class DashboardFragment extends Fragment {
         progressDialog.setMessage("Loading...");
         progressDialog.show();
 
+        noFriendsInRadius = rootView.findViewById(R.id.noFriendsInRadius);
+        noFriendsOutRadius = rootView.findViewById(R.id.noFriendsOutRadius);
+
         // Get users friends
         getUsersFriends();
 
@@ -155,7 +159,7 @@ public class DashboardFragment extends Fragment {
                     locationThread.join(10000);
                     if (locationThread.isAlive()) {
                         System.out.println("IT TOOK TOO LONG, SO QUIT");
-                        // When all freinds are rendered, delete the message
+                        // When all friends are rendered, delete the message
                         progressDialog.dismiss();
                         Toast.makeText(getContext(), "COULD NOT GET USER'S LOCATION", Toast.LENGTH_SHORT).show();
                     } else {
@@ -199,14 +203,14 @@ public class DashboardFragment extends Fragment {
                 }
                 Location location;
 
-//                do {
-//                    location = handler.getLocation();
-//                } while (location == null);
-//                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
+                do {
+                    location = handler.getLocation();
+                } while (location == null);
+                USERS_CURRENT_LOCATION = new GeoLocation(location.getLatitude(), location.getLongitude());
 
                 // update this user's location with new location
                 //TODO: REMOVE THESE AND MAKE IT DYNAMIC
-                USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
+                //USERS_CURRENT_LOCATION = new GeoLocation(44.58964199, -75.16173201);
             }
         };
         locationThread.start();
@@ -288,8 +292,17 @@ public class DashboardFragment extends Fragment {
                         addFriendOutRadiusListener(aFriendID);
 
                     }
-                    // When all freinds are rendered, delete the message
-                    progressDialog.dismiss();
+                }
+                progressDialog.dismiss();
+                if (userIdsToLocations.isEmpty()) {
+                    recyclerView.setVisibility(View.GONE);
+                    noFriendsInRadius.setVisibility(View.VISIBLE);
+
+                }
+                if (friendOutIdsWithListeners.isEmpty()) {
+                    recyclerView2.setVisibility(View.GONE);
+                    noFriendsOutRadius.setVisibility(View.VISIBLE);
+
                 }
             }
 
@@ -563,6 +576,10 @@ public class DashboardFragment extends Fragment {
         @Override
         public void onBindViewHolder(SimpleViewHolder holder, int position) {
             holder.friendListName.setText(dataSource.get(position).getName());
+            if (userIdsWithListeners.contains(dataSource.get(position).getUuid())) {
+                String dist = dataSource.get(position).getDistanceTo(USERS_CURRENT_LOCATION);
+                holder.friendListDist.setText(dist);
+            }
             downloadFromURL(dataSource.get(position).getImageURL(), holder.friendListImage);
         }
 
@@ -616,12 +633,14 @@ public class DashboardFragment extends Fragment {
          */
         class SimpleViewHolder extends RecyclerView.ViewHolder{
             public TextView friendListName;
+            public TextView friendListDist;
             public ImageView friendListImage;
 
             public SimpleViewHolder(View itemView) {
                 super(itemView);
                 friendListName = (TextView) itemView.findViewById(R.id.friend_list_item_name);
                 friendListImage = (ImageView) itemView.findViewById(R.id.friend_list_item_image);
+                friendListDist = itemView.findViewById(R.id.friend_list_item_distance);
                 Context c = itemView.getContext();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

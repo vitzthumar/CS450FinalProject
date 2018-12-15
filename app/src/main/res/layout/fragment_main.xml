@@ -30,6 +30,17 @@
             android:gravity="center"
             android:background="@color/appWhite">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:id="@+id/noFriendsOfFriends"
+                android:textColor="#000000"
+                android:textSize="26sp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="@string/no_new_people_in_your_area"/>
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/main_recyclerView"
                 android:layout_width="match_parent"
@@ -43,17 +54,19 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:background="@drawable/main_header_selector"
             android:orientation="vertical"
-            android:background="@drawable/main_header_selector">
-            android:orientation="vertical"
-            android:padding="35dp">
+            android:paddingTop="20dp"
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp">
 
             <EditText
                 android:id="@+id/pendingET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/send_friend_request_via_email"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+/>
 
             <Button
                 android:id="@+id/pendingBT"

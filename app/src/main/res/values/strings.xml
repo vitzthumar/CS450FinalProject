@@ -131,4 +131,8 @@
     <string name="friends_not_in_your_area"><u>Friends not in your area</u></string>
     <string name="friends_in_your_area"><u>Friends in your area</u></string>
     <string name="new_message">%1$s Message(s)</string>
+    <string name="no_friends_in_your_radius">No friends in your radius!</string>
+    <string name="no_new_people_in_your_area">No new people in your area!</string>
+    <string name="no_friends_in_your_area">No friends in your area!</string>
+    <string name="no_friends_outside_your_area">No friends outside your area!</string>
 </resources>
