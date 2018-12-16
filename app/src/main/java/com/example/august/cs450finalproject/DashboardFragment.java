@@ -164,18 +164,12 @@ public class DashboardFragment extends Fragment {
                         Toast.makeText(getContext(), "COULD NOT GET USER'S LOCATION", Toast.LENGTH_SHORT).show();
                     } else {
                         System.out.println("FINISHED");
+                        System.out.println("FINISHED");
+                        Location l = new Location("to");
+                        l.setLatitude(USERS_CURRENT_LOCATION.latitude);
+                        l.setLongitude(USERS_CURRENT_LOCATION.longitude);
+                        updateUserLocation(l);
 
-                        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-                        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                int radius = dataSnapshot.child("radius").getValue(Integer.class);
-                                fetchUsers(radius);
-                            }
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                            }
-                        });
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -185,6 +179,39 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    // Update user's current location in Firebase
+    private void updateUserLocation(Location userLocation) {
+        DatabaseReference locationReference = this.database.child("Locations");
+        GeoFire geoFire = new GeoFire(locationReference);
+
+        // Set Location
+        GeoLocation location;
+        location = new GeoLocation(userLocation.getLatitude(), userLocation.getLongitude());
+        geoFire.setLocation(user.getUid(), location, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+
+                }
+                // After we tried to save all the users to DB; fetch all the users
+                DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        int radius = dataSnapshot.child("radius").getValue(Integer.class);
+                        fetchUsers(radius);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
             }
         });
     }

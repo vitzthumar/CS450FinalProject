@@ -279,10 +279,19 @@ public class MainFragment extends Fragment {
                 main_load_message.setText("ERROR: Cannot load users location");
             } else {
                 System.out.println("FINISHED");
-                Location l = new Location("to");
-                l.setLatitude(USERS_CURRENT_LOCATION.latitude);
-                l.setLongitude(USERS_CURRENT_LOCATION.longitude);
-                updateUserLocation(l);
+                // After we tried to save all the users to DB; fetch all the users
+                DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        int radius = dataSnapshot.child("radius").getValue(Integer.class);
+                        fetchUsers(radius);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -330,18 +339,6 @@ public class MainFragment extends Fragment {
                 } else {
                     System.out.println("Location saved on server successfully!");
                 }
-                // After we tried to save all the users to DB; fetch all the users
-                DatabaseReference userReference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-                userReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        int radius = dataSnapshot.child("radius").getValue(Integer.class);
-                        fetchUsers(radius);
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
             }
         });
     }
