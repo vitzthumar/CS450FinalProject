@@ -1,18 +1,46 @@
-# CS450FinalProject
-August and Nevaan's final project for CS450 Android Mobile Computing
+[![INSERT YOUR GRAPHIC HERE](https://github.com/vitzthumar/CS450FinalProject/blob/master/app/src/main/res/drawable/logo.png)]()
 
+# Find My Friends: Connect • Converse
 
+> An android application that shows friends, and friends of friends in a (specified) radius, with a maximum radius of 100kms.
 
-1. Build GPS service that can determine how far away a device is from another device
-2. Build a database that shows you the distance to all other phones using the app
-- look into Firebase stuff
-3. Create a friend system that allows you to see the location of all your active friends
-4. Display all names of active friends of friends in a defined radius
+> Android, Location, Firebase
+---
 
+## Getting Started
 
+- (Register using the registration page).
+- Login using the credentials you used to register.
+- Ask friends to do the above steps.
+- Add them as friends.
+- Enjoy
 
-??? Complete authentication for user login
-- require user email and password
-- create a database for unique email ID and passwords
-- create a very simple UI to handle login
-- make the authentication step its own activity
+## Contributing
+
+> To get started...
+
+### Step 1
+
+- **Option 1**
+    - 🍴 Fork this repo!
+
+- **Option 2**
+    - 👯 Clone this repo to your local machine using `https://github.com/vitzthumar/CS450FinalProject`
+
+### Step 2
+
+- **HACK AWAY!** 🔨🔨🔨
+
+### Step 3
+
+- 🔃 Create a new pull request using <a href="https://github.com/vitzthumar/CS450FinalProject/compare" target="_blank">`https://github.com/vitzthumar/CS450FinalProject/compare`</a>.
+
+---
+
+## Contributors
+
+| Nevaan Perera | August Vitzhum |
+| :---: |:---:|
+| [![FVCproductions](https://avatars1.githubusercontent.com/u/4284691?v=3&s=200)](http://fvcproductions.com)    | [![FVCproductions](https://avatars3.githubusercontent.com/u/29083226?s=400&v=4?s=200) | 
+| <a href="https://github.com/nevaan9" target="_blank">`Nevaans Github`</a> | <a href="https://github.com/vitzthumar" target="_blank">`Augusts Github`</a> |
+
