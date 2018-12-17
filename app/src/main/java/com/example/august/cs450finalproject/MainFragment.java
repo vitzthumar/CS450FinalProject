@@ -680,6 +680,7 @@ public class MainFragment extends Fragment {
                                 // this interest is shared
                                 commonInterests.add(ds.getKey());
                             }
+                            i++;
                         }
 
                         // common interests
