@@ -41,6 +41,6 @@
 
 | Nevaan Perera | August Vitzhum |
 | :---: |:---:|
-| [![FVCproductions](https://avatars1.githubusercontent.com/u/4284691?v=3&s=200)](http://fvcproductions.com)    | [![FVCproductions](https://avatars3.githubusercontent.com/u/29083226?s=400&v=4?s=200) | 
+| [![FVCproductions](https://avatars2.githubusercontent.com/u/20254162?s=400&v=4?s=200)](http://fvcproductions.com)    | [![FVCproductions](https://avatars3.githubusercontent.com/u/29083226?s=400&v=4?s=200) | 
 | <a href="https://github.com/nevaan9" target="_blank">`Nevaans Github`</a> | <a href="https://github.com/vitzthumar" target="_blank">`Augusts Github`</a> |
 
